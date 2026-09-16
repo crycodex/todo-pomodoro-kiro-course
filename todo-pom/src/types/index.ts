@@ -1,27 +1,18 @@
 /**
- * Type definitions for todo-pom application
+ * Type definitions for todo-pom
  */
 
-/**
- * Represents a task in the todo list
- */
 export interface Task {
-  id: string           // UUID v4
-  title: string        // non-empty text, max 200 characters
+  id: string
+  title: string
   completed: boolean
-  createdAt: number    // Unix timestamp in ms
+  createdAt: number
   completedAt: number | null
-  pomodoroCount: number // Pomodoro cycles completed for this task
+  pomodoroCount: number
 }
 
-/**
- * Status of a Pomodoro session
- */
 export type PomodoroPhase = 'idle' | 'work' | 'break' | 'paused-work' | 'paused-break'
 
-/**
- * Represents a Pomodoro session associated with a task
- */
 export interface PomodoroState {
   taskId: string | null
   phase: PomodoroPhase
@@ -29,9 +20,6 @@ export interface PomodoroState {
   intervalId: number | null
 }
 
-/**
- * Complete application state (persisted to localStorage)
- */
 export interface AppState {
   tasks: Task[]
   pomodoro: Omit<PomodoroState, 'intervalId'>

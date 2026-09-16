@@ -1,0 +1,15 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`presentational snapshots > renders BreakTimer with formatted time 1`] = `
+"<div data-v-b476927d="" class="break-timer" role="status">
+  <p data-v-b476927d="" class="label">Descanso</p>
+  <p data-v-b476927d="" class="time">05:00</p>
+</div>"
+`;
+
+exports[`presentational snapshots > renders TheHeader with a storage warning 1`] = `
+"<header data-v-6c285e9a="" class="header">
+  <p data-v-6c285e9a="" class="brand">todo-pom</p>
+  <p data-v-6c285e9a="" class="warning" role="status"> No se puede guardar el estado </p>
+</header>"
+`;

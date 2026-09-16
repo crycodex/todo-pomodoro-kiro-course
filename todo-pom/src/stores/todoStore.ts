@@ -1,143 +1,279 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Task, PomodoroState } from '../types'
-import { POMODORO_DURATION } from '../utils/constants'
+import { computed, ref, watch } from 'vue'
+import type { PomodoroState, Task } from '../types'
+import { BREAK_DURATION_SECONDS, MAX_TITLE_LENGTH, WORK_DURATION_SECONDS } from '../utils/constants'
+import { loadState, saveState } from '../utils/storage'
+import { useNotifications } from '../composables/useNotifications'
 
-/**
- * Pinia store for managing todo tasks and Pomodoro state.
- * Handles task CRUD operations and Pomodoro timer state management.
- */
-export const useTodoStore = defineStore('todo', () => {
-  // ============ State ============
+function createId(): string {
+  return crypto.randomUUID()
+}
 
-  /** Array of all tasks */
-  const tasks = ref<Task[]>([])
+function normalizeTitle(title: string): string | null {
+  const trimmed = title.trim()
+  if (trimmed.length === 0) return null
+  return trimmed.slice(0, MAX_TITLE_LENGTH)
+}
 
-  /** Current Pomodoro state */
-  const pomodoro = ref<PomodoroState>({
+function createIdlePomodoro(): PomodoroState {
+  return {
     taskId: null,
     phase: 'idle',
-    secondsLeft: POMODORO_DURATION,
-    intervalId: null
+    secondsLeft: WORK_DURATION_SECONDS,
+    intervalId: null,
+  }
+}
+
+export const useTodoStore = defineStore('todo', () => {
+  const notifications = useNotifications()
+
+  const tasks = ref<Task[]>([])
+  const pomodoro = ref<PomodoroState>(createIdlePomodoro())
+  const storageWarning = ref(false)
+
+  let lastTickAt = 0
+
+  const activeTasks = computed(() =>
+    [...tasks.value.filter((task) => !task.completed)].sort((a, b) => b.createdAt - a.createdAt),
+  )
+
+  const completedTasks = computed(() =>
+    [...tasks.value.filter((task) => task.completed)].sort(
+      (a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0),
+    ),
+  )
+
+  const activeTask = computed(() => {
+    if (!pomodoro.value.taskId) return undefined
+    return tasks.value.find((task) => task.id === pomodoro.value.taskId)
   })
 
-  /** Total completed Pomodoro cycles (across all tasks) */
-  const completedPomodoros = ref(0)
+  const pomodoroRunning = computed(
+    () => pomodoro.value.phase === 'work' || pomodoro.value.phase === 'break',
+  )
 
-  /** Current cycle number (1-4), resets on long break */
-  const currentCycle = ref(1)
-
-  // ============ Getters ============
-
-  /**
-   * Returns all active (non-completed) tasks, ordered by creation date descending.
-   */
-  const activeTasks = computed(() => {
-    const active = tasks.value.filter(t => !t.completed)
-    return [...active].sort((a, b) => b.createdAt - a.createdAt)
-  })
-
-  /**
-   * Returns all completed tasks, ordered by completion date descending.
-   */
-  const completedTasks = computed(() => {
-    const completed = tasks.value.filter(t => t.completed)
-    return [...completed].sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))
-  })
-
-  /**
-   * Count of pending (active) tasks.
-   */
-  const pendingTaskCount = computed(() => activeTasks.value.length)
-
-  // ============ Actions ============
-
-  /**
-   * Creates a new task with the given title.
-   * Validates that title is not empty or whitespace-only.
-   * Truncates title to MAX_TITLE_LENGTH if exceeded.
-   *
-   * @param title - The title for the new task
-   */
-  function addTask(title: string): void {
-    const trimmedTitle = title.trim()
-
-    if (trimmedTitle.length === 0) {
-      return // Reject empty or whitespace-only titles
+  function _clearTimer(): void {
+    if (pomodoro.value.intervalId != null) {
+      clearInterval(pomodoro.value.intervalId)
+      pomodoro.value.intervalId = null
     }
+  }
 
-    const newTask: Task = {
-      id: crypto.randomUUID(),
-      title: trimmedTitle,
+  function _startTimer(): void {
+    _clearTimer()
+    lastTickAt = Date.now()
+    pomodoro.value.intervalId = window.setInterval(() => {
+      lastTickAt = Date.now()
+      _tick()
+    }, 1000)
+  }
+
+  function addTask(title: string): void {
+    const normalized = normalizeTitle(title)
+    if (normalized === null) return
+
+    tasks.value.push({
+      id: createId(),
+      title: normalized,
       completed: false,
       createdAt: Date.now(),
       completedAt: null,
-      pomodoroCount: 0
-    }
-
-    tasks.value.push(newTask)
+      pomodoroCount: 0,
+    })
   }
 
-  /**
-   * Toggles the completed status of a task.
-   *
-   * @param id - The ID of the task to toggle
-   */
-  function toggleTask(id: string): void {
-    const task = tasks.value.find(t => t.id === id)
+  function editTask(id: string, title: string): void {
+    const task = tasks.value.find((item) => item.id === id)
     if (!task) return
 
-    task.completed = !task.completed
-    task.completedAt = task.completed ? Date.now() : null
+    const normalized = normalizeTitle(title)
+    if (normalized === null) return
+
+    task.title = normalized
   }
 
-  /**
-   * Removes a task from the list permanently.
-   *
-   * @param id - The ID of the task to delete
-   */
   function deleteTask(id: string): void {
-    const index = tasks.value.findIndex(t => t.id === id)
-    if (index !== -1) {
-      tasks.value.splice(index, 1)
+    if (pomodoro.value.taskId === id) {
+      cancelPomodoro()
+    }
+    tasks.value = tasks.value.filter((task) => task.id !== id)
+  }
+
+  function toggleComplete(id: string): void {
+    const task = tasks.value.find((item) => item.id === id)
+    if (!task) return
+
+    const completing = !task.completed
+    task.completed = completing
+    task.completedAt = completing ? Date.now() : null
+
+    if (completing && pomodoro.value.taskId === id && pomodoro.value.phase !== 'idle') {
+      cancelPomodoro()
     }
   }
 
-  /**
-   * Updates the title of a task.
-   * Validates that new title is not empty or whitespace-only.
-   *
-   * @param id - The ID of the task to update
-   * @param newTitle - The new title for the task
-   */
-  function updateTaskTitle(id: string, newTitle: string): void {
-    const task = tasks.value.find(t => t.id === id)
-    if (!task) return
+  function startPomodoro(taskId: string): void {
+    const task = tasks.value.find((item) => item.id === taskId)
+    if (!task || task.completed) return
 
-    const trimmedTitle = newTitle.trim()
+    cancelPomodoro()
+    void notifications.requestPermission()
 
-    // Reject empty or whitespace-only titles
-    if (trimmedTitle.length === 0) {
+    pomodoro.value.taskId = taskId
+    pomodoro.value.phase = 'work'
+    pomodoro.value.secondsLeft = WORK_DURATION_SECONDS
+    _startTimer()
+  }
+
+  function pausePomodoro(): void {
+    if (pomodoro.value.phase === 'work') {
+      pomodoro.value.phase = 'paused-work'
+      _clearTimer()
+    } else if (pomodoro.value.phase === 'break') {
+      pomodoro.value.phase = 'paused-break'
+      _clearTimer()
+    }
+  }
+
+  function resumePomodoro(): void {
+    if (pomodoro.value.phase === 'paused-work') {
+      pomodoro.value.phase = 'work'
+      _startTimer()
+    } else if (pomodoro.value.phase === 'paused-break') {
+      pomodoro.value.phase = 'break'
+      _startTimer()
+    }
+  }
+
+  function cancelPomodoro(): void {
+    _clearTimer()
+    pomodoro.value = createIdlePomodoro()
+  }
+
+  function _tick(): void {
+    if (pomodoro.value.phase !== 'work' && pomodoro.value.phase !== 'break') return
+
+    pomodoro.value.secondsLeft -= 1
+    if (pomodoro.value.secondsLeft > 0) return
+
+    if (pomodoro.value.phase === 'work') {
+      _onWorkEnd()
+    } else {
+      _onBreakEnd()
+    }
+  }
+
+  function _onWorkEnd(): void {
+    const task = activeTask.value
+    if (task) {
+      task.pomodoroCount += 1
+      notifications.notifyWorkEnd(task.title)
+    } else {
+      notifications.notifyWorkEnd('tarea')
+    }
+
+    pomodoro.value.phase = 'break'
+    pomodoro.value.secondsLeft = BREAK_DURATION_SECONDS
+  }
+
+  function _onBreakEnd(): void {
+    notifications.notifyBreakEnd()
+    _clearTimer()
+    pomodoro.value = createIdlePomodoro()
+  }
+
+  function _applyElapsed(elapsedSeconds: number): void {
+    if (!pomodoroRunning.value || elapsedSeconds <= 0) return
+
+    if (elapsedSeconds >= pomodoro.value.secondsLeft) {
+      pomodoro.value.secondsLeft = 0
+      if (pomodoro.value.phase === 'work') {
+        _onWorkEnd()
+      } else {
+        _onBreakEnd()
+      }
       return
     }
 
-    task.title = trimmedTitle
+    pomodoro.value.secondsLeft -= elapsedSeconds
   }
 
+  function _correctHiddenTime(): void {
+    if (!pomodoroRunning.value || lastTickAt === 0) return
+    const elapsed = Math.floor((Date.now() - lastTickAt) / 1000)
+    if (elapsed > 0) {
+      _applyElapsed(elapsed)
+      lastTickAt = Date.now()
+    }
+  }
+
+  function _saveToStorage(): void {
+    try {
+      saveState({
+        tasks: tasks.value,
+        pomodoro: {
+          taskId: pomodoro.value.taskId,
+          phase: pomodoro.value.phase,
+          secondsLeft: pomodoro.value.secondsLeft,
+        },
+      })
+      storageWarning.value = false
+    } catch {
+      storageWarning.value = true
+    }
+  }
+
+  function _loadFromStorage(): void {
+    const loaded = loadState()
+    if (!loaded) return
+
+    tasks.value = loaded.tasks
+    const phase =
+      loaded.pomodoro.phase === 'work'
+        ? 'paused-work'
+        : loaded.pomodoro.phase === 'break'
+          ? 'paused-break'
+          : loaded.pomodoro.phase
+
+    pomodoro.value = {
+      taskId: loaded.pomodoro.taskId,
+      phase,
+      secondsLeft: loaded.pomodoro.secondsLeft,
+      intervalId: null,
+    }
+  }
+
+  watch(
+    [tasks, pomodoro],
+    () => {
+      _saveToStorage()
+    },
+    { deep: true, flush: 'sync' },
+  )
+
   return {
-    // State
     tasks,
     pomodoro,
-    completedPomodoros,
-    currentCycle,
-    // Getters
+    storageWarning,
+    bannerMessage: notifications.bannerMessage,
     activeTasks,
     completedTasks,
-    pendingTaskCount,
-    // Actions
+    activeTask,
+    pomodoroRunning,
     addTask,
-    toggleTask,
+    editTask,
     deleteTask,
-    updateTaskTitle
+    toggleComplete,
+    startPomodoro,
+    pausePomodoro,
+    resumePomodoro,
+    cancelPomodoro,
+    _tick,
+    _onWorkEnd,
+    _onBreakEnd,
+    _applyElapsed,
+    _correctHiddenTime,
+    _loadFromStorage,
+    _saveToStorage,
   }
 })

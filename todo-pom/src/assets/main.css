@@ -1,0 +1,99 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --color-bg: #f3f3f3;
+  --color-surface: #ffffff;
+  --color-text: #141414;
+  --color-text-muted: #6a6a6a;
+  --color-border: #d2d2d2;
+  --color-hover: #ececec;
+  --color-inverse: #1a1a1a;
+  --color-inverse-text: #f7f7f7;
+  --header-height: 64px;
+  --tap: 44px;
+  --font: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+#app {
+  min-height: 100svh;
+}
+
+.app-shell {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-banner {
+  margin: 0 16px;
+  padding: 10px 14px;
+  background: var(--color-inverse);
+  color: var(--color-inverse-text);
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+
+.app-layout {
+  flex: 1;
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tasks-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .app-layout {
+    padding: 24px;
+  }
+
+  .app-layout.with-timer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    align-items: start;
+    gap: 28px;
+  }
+}
