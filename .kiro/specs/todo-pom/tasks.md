@@ -9,7 +9,7 @@ Implementación incremental de la SPA todo-pom con Vue 3 (Composition API), Pini
 ## Tasks
 
 - [ ] 1. Scaffolding del proyecto
-  - [ ] 1.1 Inicializar proyecto Vite + Vue 3 con TypeScript
+  - [x] 1.1 Inicializar proyecto Vite + Vue 3 con TypeScript
     - Crear proyecto con `npm create vite@latest todo-pom -- --template vue-ts`
     - Instalar dependencias: `pinia`, `vitest`, `@vitest/ui`, `@vue/test-utils`, `fast-check`, `jsdom`
     - Configurar `vitest.config.ts` con `environment: 'jsdom'` y alias `@` → `src/`
@@ -17,13 +17,13 @@ Implementación incremental de la SPA todo-pom con Vue 3 (Composition API), Pini
     - Eliminar código boilerplate generado por Vite (App.vue de ejemplo, estilos por defecto, componentes de ejemplo)
     - _Requirements: ninguno (infraestructura)_
 
-  - [ ] 1.2 Configurar estructura de directorios
+  - [x] 1.2 Configurar estructura de directorios
     - Crear árbol: `src/components/`, `src/stores/`, `src/composables/`, `src/types/`, `src/utils/`, `tests/unit/`, `tests/properties/`
     - Añadir `src/main.ts` con registro de Pinia
     - _Requirements: ninguno (infraestructura)_
 
 - [ ] 2. Modelos de datos, tipos y constantes
-  - [ ] 2.1 Definir interfaces TypeScript y constantes
+  - [x] 2.1 Definir interfaces TypeScript y constantes
     - Crear `src/types/index.ts` con `Task`, `PomodoroPhase`, `PomodoroState`, `AppState`
     - Crear `src/utils/constants.ts` con `WORK_DURATION_SECONDS`, `BREAK_DURATION_SECONDS`, `STORAGE_KEY`, `MAX_TITLE_LENGTH`
     - _Requirements: 1, 3, 5_

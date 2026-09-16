@@ -1,0 +1,343 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Inicializar proyecto Vite + Vue 3 con TypeScript": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574810765
+      },
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574882055
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575580698
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575589998
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575594021
+      }
+    ],
+    "1.2 Configurar estructura de directorios": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574810990
+      },
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574881983
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575580847
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575590128
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575593955
+      }
+    ],
+    "2.1 Definir interfaces TypeScript y constantes": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811126
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575580917
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575599590
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575704564
+      }
+    ],
+    "2.2 Implementar utilidad `formatTime`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811310
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575580988
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575709905
+      }
+    ],
+    "3.1 Implementar state, getters y actions básicas de tareas": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811389
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581056
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575709853
+      }
+    ],
+    "3.4 Implementar actions del Pomodoro en el store": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811466
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581135
+      }
+    ],
+    "4. Checkpoint — Tests del store": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811601
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581208
+      }
+    ],
+    "5.1 Implementar `usePomodoro`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811695
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581315
+      }
+    ],
+    "6.1 Implementar `useNotifications`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811771
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581384
+      }
+    ],
+    "7.1 Implementar serialización/deserialización de `AppState`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811880
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581450
+      }
+    ],
+    "7.2 Integrar persistencia en el store": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574811982
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581528
+      }
+    ],
+    "8. Checkpoint — Tests de persistencia": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812057
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581599
+      }
+    ],
+    "9.1 Implementar `TheHeader.vue`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812132
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581673
+      }
+    ],
+    "9.2 Implementar `TaskInput.vue`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812209
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581753
+      }
+    ],
+    "9.3 Implementar `TaskItem.vue`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812342
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581833
+      }
+    ],
+    "9.4 Implementar `TaskList.vue` y `CompletedList.vue`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812444
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581899
+      }
+    ],
+    "9.5 Implementar `BreakTimer.vue`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812529
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575581965
+      }
+    ],
+    "9.6 Implementar `PomodoroOverlay.vue`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812595
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575582032
+      }
+    ],
+    "9.7 Ensamblar `App.vue`": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812663
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575582102
+      }
+    ],
+    "10. Checkpoint — Tests de componentes": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812756
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575582181
+      }
+    ],
+    "11.1 Definir variables CSS y estilos globales": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574812894
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575582251
+      }
+    ],
+    "11.2 Aplicar estilos scoped a cada componente": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574813003
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575582318
+      }
+    ],
+    "11.3 Implementar layout responsive": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574813094
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575582385
+      }
+    ],
+    "12. Checkpoint final — Suite completa de tests": [
+      {
+        "executionId": "1d3ccada-6f62-4f31-9710-7fcb63ea6d00",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789574813167
+      },
+      {
+        "executionId": "8b9d93bf-3f93-45a2-9903-cd83e4d8c406",
+        "chatSessionId": "sess_1c6850ce-f8a0-4a66-b89f-1cc985eaa838",
+        "timestamp": 1789575582453
+      }
+    ]
+  }
+}
