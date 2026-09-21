@@ -15,7 +15,6 @@ const store = useTodoStore()
       :key="task.id"
       :task="task"
       :is-active="store.pomodoro.taskId === task.id && store.pomodoro.phase !== 'idle'"
-      :timer-phase="store.pomodoro.taskId === task.id ? store.pomodoro.phase : 'idle'"
       @toggle-complete="store.toggleComplete"
       @edit="store.editTask"
       @delete="store.deleteTask"

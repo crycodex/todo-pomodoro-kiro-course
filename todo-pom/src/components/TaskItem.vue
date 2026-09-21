@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
-import type { PomodoroPhase, Task } from '../types'
+import type { Task } from '../types'
+import { formatTime } from '../utils/formatTime'
 
 const props = defineProps<{
   task: Task
   isActive: boolean
-  timerPhase?: PomodoroPhase
 }>()
 
 const emit = defineEmits<{
@@ -21,9 +21,13 @@ const draft = ref(props.task.title)
 const editInput = ref<HTMLInputElement | null>(null)
 
 const timerStatus = computed(() => {
-  if (!props.isActive || !props.timerPhase || props.timerPhase === 'idle') return 'idle'
-  if (props.timerPhase === 'paused-work' || props.timerPhase === 'paused-break') return 'paused'
+  if (!props.task.timerState || props.task.timerState.phase === 'idle') return 'idle'
+  if (props.task.timerState.phase === 'paused-work' || props.task.timerState.phase === 'paused-break') return 'paused'
   return 'running'
+})
+
+const hasTimer = computed(() => {
+  return !!props.task.timerState && props.task.timerState.phase !== 'idle'
 })
 
 async function beginEdit(): Promise<void> {
@@ -61,7 +65,7 @@ function onPomodoroClick(): void {
 </script>
 
 <template>
-  <article class="item" :class="{ completed: task.completed, active: isActive }">
+  <article class="item" :class="{ completed: task.completed, active: isActive, 'has-timer': hasTimer, 'timer-paused': timerStatus === 'paused', 'timer-running': timerStatus === 'running' }">
     <button
       class="check"
       type="button"
@@ -92,11 +96,13 @@ function onPomodoroClick(): void {
         {{ task.title }}
       </p>
       <p class="meta">
+        <span v-if="task.timerState">{{ formatTime(task.timerState.secondsLeft) }} • </span>
         {{ task.pomodoroCount }} {{ task.pomodoroCount === 1 ? 'ciclo' : 'ciclos' }}
       </p>
     </div>
 
     <div class="actions">
+      <span v-if="hasTimer" class="timer-indicator" :class="timerStatus"></span>
       <button
         v-if="!task.completed"
         class="icon-btn"
@@ -194,6 +200,27 @@ function onPomodoroClick(): void {
 .actions {
   display: flex;
   align-items: center;
+  gap: 4px;
+}
+
+.timer-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.timer-indicator.running {
+  background: #10b981;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.timer-indicator.paused {
+  background: #f59e0b;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .icon-btn {

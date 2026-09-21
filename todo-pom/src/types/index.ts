@@ -9,9 +9,15 @@ export interface Task {
   createdAt: number
   completedAt: number | null
   pomodoroCount: number
+  timerState: TimerState | null
 }
 
 export type PomodoroPhase = 'idle' | 'work' | 'break' | 'paused-work' | 'paused-break'
+
+export interface TimerState {
+  phase: PomodoroPhase
+  secondsLeft: number
+}
 
 export interface PomodoroState {
   taskId: string | null

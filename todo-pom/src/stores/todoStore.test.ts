@@ -110,13 +110,51 @@ describe('useTodoStore', () => {
     })
   })
 
+  describe('timerState', () => {
+    it('starts with null timerState when task is created', () => {
+      const store = useTodoStore()
+      store.addTask('New task')
+      expect(store.tasks[0]!.timerState).toBeNull()
+    })
+
+    it('initializes timerState when startPomodoro is called', () => {
+      const store = useTodoStore()
+      store.addTask('Task with timer')
+      const id = store.tasks[0]!.id
+      store.startPomodoro(id)
+      expect(store.tasks[0]!.timerState).toEqual({
+        phase: 'work',
+        secondsLeft: WORK_DURATION_SECONDS,
+      })
+    })
+
+    it('updates task timerState.phase when pausing work phase', () => {
+      const store = useTodoStore()
+      store.addTask('Task')
+      const id = store.tasks[0]!.id
+      store.startPomodoro(id)
+      store.pausePomodoro()
+      expect(store.tasks[0]!.timerState?.phase).toBe('paused-work')
+    })
+
+    it('updates task timerState.phase when pausing break phase', () => {
+      const store = useTodoStore()
+      store.addTask('Task')
+      const id = store.tasks[0]!.id
+      store.startPomodoro(id)
+      vi.advanceTimersByTime(WORK_DURATION_SECONDS * 1000)
+      store.pausePomodoro()
+      expect(store.tasks[0]!.timerState?.phase).toBe('paused-break')
+    })
+  })
+
   describe('getters', () => {
     it('sorts active and completed tasks as specified', () => {
       const store = useTodoStore()
       store.tasks = [
-        { id: '1', title: 'Task 1', completed: false, createdAt: 1000, completedAt: null, pomodoroCount: 0 },
-        { id: '2', title: 'Task 2', completed: true, createdAt: 2000, completedAt: 4000, pomodoroCount: 0 },
-        { id: '3', title: 'Task 3', completed: false, createdAt: 3000, completedAt: null, pomodoroCount: 0 },
+        { id: '1', title: 'Task 1', completed: false, createdAt: 1000, completedAt: null, pomodoroCount: 0, timerState: null },
+        { id: '2', title: 'Task 2', completed: true, createdAt: 2000, completedAt: 4000, pomodoroCount: 0, timerState: null },
+        { id: '3', title: 'Task 3', completed: false, createdAt: 3000, completedAt: null, pomodoroCount: 0, timerState: null },
       ]
       expect(store.activeTasks.map((task) => task.title)).toEqual(['Task 3', 'Task 1'])
       expect(store.completedTasks.map((task) => task.title)).toEqual(['Task 2'])

@@ -9,6 +9,15 @@ const PHASES: readonly PomodoroPhase[] = [
   'paused-break',
 ]
 
+function isTimerState(value: unknown): value is { phase: string; secondsLeft: number } {
+  if (!value || typeof value !== 'object') return false
+  const state = value as Record<string, unknown>
+  return (
+    typeof state.phase === 'string' &&
+    typeof state.secondsLeft === 'number'
+  )
+}
+
 function isTask(value: unknown): value is Task {
   if (!value || typeof value !== 'object') return false
   const task = value as Record<string, unknown>
@@ -18,7 +27,8 @@ function isTask(value: unknown): value is Task {
     typeof task.completed === 'boolean' &&
     typeof task.createdAt === 'number' &&
     (task.completedAt === null || typeof task.completedAt === 'number') &&
-    typeof task.pomodoroCount === 'number'
+    typeof task.pomodoroCount === 'number' &&
+    (task.timerState === null || isTimerState(task.timerState))
   )
 }
 

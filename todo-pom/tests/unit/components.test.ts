@@ -15,6 +15,7 @@ const task: Task = {
   createdAt: 1,
   completedAt: null,
   pomodoroCount: 3,
+  timerState: null,
 }
 
 function timer(phase: PomodoroState['phase'], secondsLeft = 125): PomodoroState {
@@ -54,7 +55,7 @@ describe('TaskInput', () => {
 describe('TaskItem', () => {
   it('renders title, pomodoro count and action buttons', () => {
     const wrapper = mount(TaskItem, {
-      props: { task, isActive: false, timerPhase: 'idle' },
+      props: { task, isActive: false },
     })
     expect(wrapper.text()).toContain('Diseñar overlay')
     expect(wrapper.text()).toContain('3 ciclos')
@@ -73,8 +74,9 @@ describe('TaskItem', () => {
   })
 
   it('discards an empty inline edit', async () => {
+    const taskWithTimerState: Task = { ...task, timerState: null }
     const wrapper = mount(TaskItem, {
-      props: { task, isActive: false },
+      props: { task: taskWithTimerState, isActive: false },
     })
     await wrapper.get('.title').trigger('dblclick')
     const input = wrapper.get('input.edit')

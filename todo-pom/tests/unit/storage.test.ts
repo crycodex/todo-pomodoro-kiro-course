@@ -14,6 +14,7 @@ const sample: AppState = {
       createdAt: 1000,
       completedAt: null,
       pomodoroCount: 2,
+      timerState: null,
     },
   ],
   pomodoro: {

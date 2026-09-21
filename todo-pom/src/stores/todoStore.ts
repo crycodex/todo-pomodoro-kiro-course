@@ -79,6 +79,7 @@ export const useTodoStore = defineStore('todo', () => {
       createdAt: Date.now(),
       completedAt: null,
       pomodoroCount: 0,
+      timerState: null,
     })
   }
 
@@ -116,36 +117,64 @@ export const useTodoStore = defineStore('todo', () => {
     const task = tasks.value.find((item) => item.id === taskId)
     if (!task || task.completed) return
 
-    cancelPomodoro()
-    void notifications.requestPermission()
-
+    // Clear timer and reset global state WITHOUT clearing previous task's timerState
+    // This preserves the timerState of the previously active task
+    _clearTimer()
     pomodoro.value.taskId = taskId
     pomodoro.value.phase = 'work'
     pomodoro.value.secondsLeft = WORK_DURATION_SECONDS
+
+    void notifications.requestPermission()
+
+    // Initialize task timer state and sync with global state
+    task.timerState = {
+      phase: 'work',
+      secondsLeft: WORK_DURATION_SECONDS,
+    }
+
     _startTimer()
   }
 
   function pausePomodoro(): void {
     if (pomodoro.value.phase === 'work') {
       pomodoro.value.phase = 'paused-work'
+      const task = activeTask.value
+      if (task?.timerState) {
+        task.timerState.phase = 'paused-work'
+      }
       _clearTimer()
     } else if (pomodoro.value.phase === 'break') {
       pomodoro.value.phase = 'paused-break'
+      const task = activeTask.value
+      if (task?.timerState) {
+        task.timerState.phase = 'paused-break'
+      }
       _clearTimer()
     }
   }
 
   function resumePomodoro(): void {
+    const task = activeTask.value
     if (pomodoro.value.phase === 'paused-work') {
       pomodoro.value.phase = 'work'
+      if (task?.timerState) {
+        task.timerState.phase = 'work'
+      }
       _startTimer()
     } else if (pomodoro.value.phase === 'paused-break') {
       pomodoro.value.phase = 'break'
+      if (task?.timerState) {
+        task.timerState.phase = 'break'
+      }
       _startTimer()
     }
   }
 
   function cancelPomodoro(): void {
+    const task = activeTask.value
+    if (task) {
+      task.timerState = null
+    }
     _clearTimer()
     pomodoro.value = createIdlePomodoro()
   }
@@ -154,6 +183,11 @@ export const useTodoStore = defineStore('todo', () => {
     if (pomodoro.value.phase !== 'work' && pomodoro.value.phase !== 'break') return
 
     pomodoro.value.secondsLeft -= 1
+    const task = activeTask.value
+    if (task?.timerState) {
+      task.timerState.secondsLeft = pomodoro.value.secondsLeft
+    }
+
     if (pomodoro.value.secondsLeft > 0) return
 
     if (pomodoro.value.phase === 'work') {
@@ -167,6 +201,10 @@ export const useTodoStore = defineStore('todo', () => {
     const task = activeTask.value
     if (task) {
       task.pomodoroCount += 1
+      task.timerState = {
+        phase: 'break',
+        secondsLeft: BREAK_DURATION_SECONDS,
+      }
       notifications.notifyWorkEnd(task.title)
     } else {
       notifications.notifyWorkEnd('tarea')
@@ -177,6 +215,10 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   function _onBreakEnd(): void {
+    const task = activeTask.value
+    if (task) {
+      task.timerState = null
+    }
     notifications.notifyBreakEnd()
     _clearTimer()
     pomodoro.value = createIdlePomodoro()
@@ -240,6 +282,16 @@ export const useTodoStore = defineStore('todo', () => {
       phase,
       secondsLeft: loaded.pomodoro.secondsLeft,
       intervalId: null,
+    }
+
+    // Sincronización post-carga: asegurar que el estado global refleje timerState
+    const activeTaskId = loaded.pomodoro.taskId
+    if (activeTaskId && phase !== 'idle') {
+      const task = tasks.value.find((t) => t.id === activeTaskId)
+      if (task?.timerState) {
+        pomodoro.value.phase = task.timerState.phase
+        pomodoro.value.secondsLeft = task.timerState.secondsLeft
+      }
     }
   }
 
