@@ -23,6 +23,7 @@ const taskArb = fc.record({
     fc.record({
       phase: fc.constantFrom(...phases),
       secondsLeft: fc.integer({ min: 0, max: 1500 }),
+      isRunning: fc.option(fc.boolean(), { nil: undefined }),
     }),
     { nil: null },
   ),
@@ -126,7 +127,7 @@ describe('storage properties', () => {
               // Asignar un timerState para la prueba
               return {
                 ...task,
-                timerState: { phase: 'work' as const, secondsLeft: 900 },
+                timerState: { phase: 'work' as const, secondsLeft: 900, isRunning: false },
               }
             }
             return task

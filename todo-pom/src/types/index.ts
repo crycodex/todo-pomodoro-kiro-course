@@ -17,6 +17,7 @@ export type PomodoroPhase = 'idle' | 'work' | 'break' | 'paused-work' | 'paused-
 export interface TimerState {
   phase: PomodoroPhase
   secondsLeft: number
+  isRunning?: boolean
 }
 
 export interface PomodoroState {

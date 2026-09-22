@@ -121,8 +121,15 @@ export const useTodoStore = defineStore('todo', () => {
     // This preserves the timerState of the previously active task
     _clearTimer()
     pomodoro.value.taskId = taskId
-    pomodoro.value.phase = 'work'
-    pomodoro.value.secondsLeft = WORK_DURATION_SECONDS
+
+    // Restore from existing timerState or start fresh
+    if (task?.timerState) {
+      pomodoro.value.phase = task.timerState.phase
+      pomodoro.value.secondsLeft = task.timerState.secondsLeft
+    } else {
+      pomodoro.value.phase = 'work'
+      pomodoro.value.secondsLeft = WORK_DURATION_SECONDS
+    }
 
     void notifications.requestPermission()
 
@@ -183,9 +190,12 @@ export const useTodoStore = defineStore('todo', () => {
     if (pomodoro.value.phase !== 'work' && pomodoro.value.phase !== 'break') return
 
     pomodoro.value.secondsLeft -= 1
-    const task = activeTask.value
-    if (task?.timerState) {
-      task.timerState.secondsLeft = pomodoro.value.secondsLeft
+
+    // Buscar la tarea activa y sincronizar timerState si existe
+    const activeTaskItem = tasks.value.find(t => t.id === pomodoro.value.taskId)
+    if (activeTaskItem?.timerState) {
+      activeTaskItem.timerState.secondsLeft = pomodoro.value.secondsLeft
+      activeTaskItem.timerState.phase = pomodoro.value.phase
     }
 
     if (pomodoro.value.secondsLeft > 0) return
@@ -291,6 +301,16 @@ export const useTodoStore = defineStore('todo', () => {
       if (task?.timerState) {
         pomodoro.value.phase = task.timerState.phase
         pomodoro.value.secondsLeft = task.timerState.secondsLeft
+      } else if (activeTaskId) {
+        // Crear timerState desde el estado persistido si no existe
+        const task = tasks.value.find((t) => t.id === activeTaskId)
+        if (task) {
+          task.timerState = {
+            phase: pomodoro.value.phase,
+            secondsLeft: pomodoro.value.secondsLeft,
+            isRunning: false,
+          }
+        }
       }
     }
   }
