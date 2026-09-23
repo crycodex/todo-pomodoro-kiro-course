@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
+import { supabase } from '../utils/supabase'
 import type { PomodoroState, Task } from '../types'
 import { BREAK_DURATION_SECONDS, MAX_TITLE_LENGTH, WORK_DURATION_SECONDS } from '../utils/constants'
 import { loadState, saveState } from '../utils/storage'
@@ -30,6 +31,7 @@ export const useTodoStore = defineStore('todo', () => {
   const tasks = ref<Task[]>([])
   const pomodoro = ref<PomodoroState>(createIdlePomodoro())
   const storageWarning = ref(false)
+  const supabaseAuthenticated = ref(false)
 
   let lastTickAt = 0
 
@@ -327,6 +329,7 @@ export const useTodoStore = defineStore('todo', () => {
     tasks,
     pomodoro,
     storageWarning,
+    supabaseAuthenticated,
     bannerMessage: notifications.bannerMessage,
     activeTasks,
     completedTasks,

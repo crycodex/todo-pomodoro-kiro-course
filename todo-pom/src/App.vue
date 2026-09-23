@@ -12,12 +12,6 @@ const store = useTodoStore()
 const pomodoro = usePomodoro()
 const isDark = ref(false)
 
-const onCreateThemeToggle = () => {
-  const newTheme = isDark.value ? 'light' : 'dark'
-  document.documentElement.setAttribute('data-theme', newTheme)
-  isDark.value = newTheme === 'dark'
-}
-
 onMounted(() => {
   store._loadFromStorage()
   
