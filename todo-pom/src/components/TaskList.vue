@@ -26,14 +26,34 @@ const store = useTodoStore()
 
 <style scoped>
 .list {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  padding: 8px 12px 4px;
+  background: var(--bg-grouped);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-.empty {
-  margin: 18px 8px;
-  color: var(--color-text-muted);
+.list .empty {
+  margin: var(--space-4) var(--space-2);
+  color: var(--label-tertiary);
   font-size: 0.95rem;
+}
+
+.list .item {
+  display: grid;
+  grid-template-columns: var(--tap) minmax(0, 1fr) auto;
+  gap: var(--space-1);
+  align-items: center;
+  min-height: 56px;
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--divider);
+  transition: background-color var(--duration-theme) var(--ease-ios-spring);
+}
+
+.list .item:hover {
+  background: var(--fill-secondary);
+}
+
+.list .item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 </style>

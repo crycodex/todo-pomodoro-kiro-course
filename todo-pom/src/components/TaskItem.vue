@@ -133,17 +133,22 @@ function onPomodoroClick(): void {
 .item {
   display: grid;
   grid-template-columns: var(--tap) minmax(0, 1fr) auto;
-  gap: 4px;
+  gap: var(--space-1);
   align-items: center;
   min-height: 56px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--divider);
+  transition: background-color var(--duration-theme) var(--ease-ios-spring);
 }
 
 .item.active {
-  background: var(--color-hover);
+  background: var(--fill-secondary);
   margin-inline: -8px;
   padding-inline: 8px;
+}
+
+.item.completed {
+  opacity: 0.7;
 }
 
 .check,
@@ -157,14 +162,23 @@ function onPomodoroClick(): void {
 }
 
 .box {
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid var(--color-text);
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
   background: transparent;
+  transition: background-color var(--duration-theme) var(--ease-ios-spring),
+              border-color var(--duration-theme) var(--ease-ios-spring),
+              transform var(--duration-theme) var(--ease-ios-spring);
 }
 
 .box.on {
-  background: var(--color-text);
+  background: var(--system-blue);
+  border-color: var(--system-blue);
+}
+
+.check:active .box {
+  transform: scale(1.05);
 }
 
 .body {
@@ -176,46 +190,64 @@ function onPomodoroClick(): void {
   margin: 0;
   font-size: 1rem;
   width: 100%;
+  font-family: inherit;
+  color: var(--label-primary);
+}
+
+.title {
+  padding: var(--space-1) 0;
 }
 
 .edit {
   min-height: 36px;
   border: 0;
-  border-bottom: 1px solid var(--color-text);
+  border-bottom: 2px solid var(--border);
   background: transparent;
   padding: 0;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  color: inherit;
+}
+
+.edit:focus {
+  border-bottom-color: var(--system-blue);
+  outline: none;
 }
 
 .title.done {
   text-decoration: line-through;
-  color: var(--color-text-muted);
+  color: var(--label-tertiary);
 }
 
 .meta {
-  margin: 2px 0 0;
+  margin: var(--space-1) 0 0;
   font-size: 0.75rem;
-  color: var(--color-text-muted);
+  color: var(--label-tertiary);
 }
 
 .actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .timer-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
 }
 
 .timer-indicator.running {
-  background: #10b981;
+  background: var(--system-green);
   animation: pulse 1s ease-in-out infinite;
 }
 
 .timer-indicator.paused {
-  background: #f59e0b;
+  background: var(--system-orange);
+}
+
+.timer-indicator.idle {
+  background: transparent;
 }
 
 @keyframes pulse {
@@ -225,18 +257,25 @@ function onPomodoroClick(): void {
 
 .icon-btn {
   font-size: 1.4rem;
-  color: var(--color-text);
+  color: var(--label-primary);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background-color var(--duration-theme) var(--ease-ios-spring);
 }
 
 .icon-btn:hover {
-  background: var(--color-hover);
+  background: var(--fill-secondary);
+}
+
+.icon-btn.danger:hover {
+  background: rgba(255, 59, 48, 0.1);
 }
 
 .glyph {
   display: block;
   width: 14px;
   height: 14px;
-  background: var(--color-text);
+  background: var(--label-primary);
 }
 
 .glyph.idle {
@@ -250,11 +289,7 @@ function onPomodoroClick(): void {
 .glyph.paused {
   width: 12px;
   background:
-    linear-gradient(var(--color-text), var(--color-text)) 0 0 / 4px 100% no-repeat,
-    linear-gradient(var(--color-text), var(--color-text)) 8px 0 / 4px 100% no-repeat;
-}
-
-.danger {
-  color: var(--color-text-muted);
+    linear-gradient(var(--label-primary), var(--label-primary)) 0 0 / 4px 100% no-repeat,
+    linear-gradient(var(--label-primary), var(--label-primary)) 8px 0 / 4px 100% no-repeat;
 }
 </style>

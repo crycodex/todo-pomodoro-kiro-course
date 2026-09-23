@@ -15,25 +15,29 @@ defineProps<{
 
 <style scoped>
 .break-timer {
-  padding: 16px 12px;
-  background: var(--color-inverse);
-  color: var(--color-inverse-text);
+  padding: var(--space-4) var(--space-3);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
   text-align: center;
 }
 
-.label {
-  margin: 0 0 4px;
+.break-timer .label {
+  margin: 0 0 var(--space-1);
   font-size: 0.75rem;
   letter-spacing: 0.08em;
-  color: #c4c4c4;
+  color: var(--label-tertiary);
+  text-transform: uppercase;
 }
 
-.time {
+.break-timer .time {
   margin: 0;
   font-family: var(--mono);
   font-size: 2.4rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
   line-height: 1;
+  color: var(--label-primary);
 }
 </style>

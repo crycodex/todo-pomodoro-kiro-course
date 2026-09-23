@@ -29,42 +29,57 @@ const open = ref(false)
 
 <style scoped>
 .completed {
-  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-4);
+  background: var(--bg-grouped);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
-.toggle {
+.completed .toggle {
   width: 100%;
   min-height: var(--tap);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 4px;
+  padding: 0 var(--space-2);
   border: 0;
   background: transparent;
-  color: var(--color-text-muted);
+  color: var(--label-primary);
   font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--duration-theme) var(--ease-ios-spring);
 }
 
-.chevron {
-  transition: transform 0.2s ease;
+.completed .toggle:hover {
+  background: var(--fill-secondary);
 }
 
-.chevron.open {
+.completed .chevron {
+  transition: transform var(--duration-theme) var(--ease-ios-spring);
+}
+
+.completed .chevron.open {
   transform: rotate(180deg);
 }
 
 .panel {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.2s ease;
+  transition: grid-template-rows var(--duration-theme) var(--ease-ios-spring);
 }
 
 .panel.open {
   grid-template-rows: 1fr;
 }
 
-.panel :deep(article),
+.panel :deep(.item),
 .panel {
   overflow: hidden;
+}
+
+.panel .item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 </style>

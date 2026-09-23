@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useTodoStore } from './stores/todoStore'
 import { usePomodoro } from './composables/usePomodoro'
 import TheHeader from './components/TheHeader.vue'
@@ -10,9 +10,21 @@ import PomodoroOverlay from './components/PomodoroOverlay.vue'
 
 const store = useTodoStore()
 const pomodoro = usePomodoro()
+const isDark = ref(false)
+
+const onCreateThemeToggle = () => {
+  const newTheme = isDark.value ? 'light' : 'dark'
+  document.documentElement.setAttribute('data-theme', newTheme)
+  isDark.value = newTheme === 'dark'
+}
 
 onMounted(() => {
   store._loadFromStorage()
+  
+  // Auto-detect prefers-color-scheme
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  isDark.value = prefersDark
+  document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
 })
 </script>
 

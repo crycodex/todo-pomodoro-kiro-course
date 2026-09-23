@@ -1,0 +1,50 @@
+# iOS UI Redesign Specification Config
+specId: ios-ui-redesign
+workflowType: feature
+specType: design-first
+version: 1.0.0
+created: 2024-01-15
+lastUpdated: 2024-01-15
+
+# Metadata
+description: Complete iOS-inspired UI redesign with liquid glass, blur effects, and dark mode support
+appType: vue3-todo-pomodoro
+components: 8
+
+# Workflow Configuration
+workflow:
+  phases:
+    - design-tokens
+    - base-styles
+    - component-redesign
+    - animations-accessibility
+    - testing
+  blockers: []
+  dependencies: []
+
+# Design System Baseline
+designSystem:
+  platform: ios
+  styleApproach: css-only
+  noNewDependencies: true
+
+# Files to Modify
+targetFiles:
+  - src/assets/main.css
+  - src/components/TheHeader.vue
+  - src/components/TaskInput.vue
+  - src/components/TaskList.vue
+  - src/components/TaskItem.vue
+  - src/components/CompletedList.vue
+  - src/components/BreakTimer.vue
+  - src/components/PomodoroOverlay.vue
+  - src/App.vue
+
+# Deliverables
+deliverables:
+  - requirements.md
+  - design.md
+  - updated-main-css
+  - updated-component-styles
+  - motion-specifications
+  - accessibility-checklist

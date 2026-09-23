@@ -46,53 +46,78 @@ const phaseLabel = computed(() => {
 
 <style scoped>
 .overlay {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  padding: 20px 16px 16px;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-4) var(--space-4);
   text-align: center;
+  border: 1px solid var(--border);
 }
 
-.task-name {
+.overlay .task-name {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--label-primary);
 }
 
-.phase {
-  margin: 4px 0 16px;
+.overlay .phase {
+  margin: var(--space-1) 0 var(--space-4);
   font-size: 0.8rem;
-  color: var(--color-text-muted);
+  color: var(--label-tertiary);
 }
 
-.time {
-  margin: 0 0 20px;
+.overlay .time {
+  margin: 0 0 var(--space-5);
   font-family: var(--mono);
   font-size: 3.4rem;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.06em;
   line-height: 1;
+  color: var(--label-primary);
 }
 
-.controls {
+.overlay .controls {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   justify-content: center;
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
 
-button {
+.overlay button {
   min-height: var(--tap);
   min-width: var(--tap);
-  padding: 0 16px;
-  border: 1px solid var(--color-text);
-  background: var(--color-text);
-  color: var(--color-surface);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-xl);
+  background: var(--label-primary);
+  color: var(--bg-grouped);
+  font-size: 0.95rem;
   font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform var(--duration-theme) var(--ease-ios-spring),
+              background-color var(--duration-theme) var(--ease-ios-spring);
 }
 
-button.ghost {
+.overlay button:active {
+  transform: scale(0.95);
+}
+
+.overlay button:hover {
+  background: var(--fill-secondary);
+}
+
+.overlay button.ghost {
   background: transparent;
-  color: var(--color-text);
+  color: var(--system-red);
+  border: 1px solid var(--border);
+}
+
+.overlay button.ghost:hover {
+  background: rgba(255, 59, 48, 0.1);
 }
 
 @media (max-width: 767px) {

@@ -38,7 +38,7 @@ function submit(): void {
 <style scoped>
 .task-input {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: stretch;
 }
 
@@ -57,21 +57,41 @@ function submit(): void {
 input {
   flex: 1;
   min-height: var(--tap);
-  padding: 0 14px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-grouped);
   font-size: 1rem;
+  font-family: inherit;
+  color: inherit;
+  transition: border-color var(--duration-theme) var(--ease-ios-spring),
+              box-shadow var(--duration-theme) var(--ease-ios-spring);
+}
+
+input:focus {
+  border-color: var(--system-blue);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+  outline: none;
 }
 
 button {
   min-width: var(--tap);
   min-height: var(--tap);
-  padding: 0 16px;
-  border: 1px solid var(--color-text);
-  background: var(--color-text);
-  color: var(--color-surface);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-xl);
+  background: var(--label-primary);
+  color: var(--bg-grouped);
   font-size: 0.95rem;
   font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform var(--duration-theme) var(--ease-ios-spring),
+              background-color var(--duration-theme) var(--ease-ios-spring);
+}
+
+button:active {
+  transform: scale(0.95);
 }
 
 button:disabled {
@@ -80,6 +100,6 @@ button:disabled {
 }
 
 button:not(:disabled):hover {
-  background: #000;
+  background: var(--fill-secondary);
 }
 </style>
