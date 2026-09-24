@@ -6,6 +6,10 @@ import { BREAK_DURATION_SECONDS, MAX_TITLE_LENGTH, WORK_DURATION_SECONDS } from 
 import { loadState, saveState } from '../utils/storage'
 import { useNotifications } from '../composables/useNotifications'
 
+// Get Supabase credentials from environment variables
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
 function createId(): string {
   return crypto.randomUUID()
 }
@@ -31,7 +35,6 @@ export const useTodoStore = defineStore('todo', () => {
   const tasks = ref<Task[]>([])
   const pomodoro = ref<PomodoroState>(createIdlePomodoro())
   const storageWarning = ref(false)
-  const supabaseAuthenticated = ref(false)
 
   let lastTickAt = 0
 
@@ -317,10 +320,49 @@ export const useTodoStore = defineStore('todo', () => {
     }
   }
 
+  // Sync with Supabase (write-only, no auth required)
+  async function _syncToSupabase(): Promise<void> {
+    if (!supabaseUrl || !supabaseKey) return
+    
+    try {
+      // Insert new tasks that don't exist in Supabase
+      for (const task of tasks.value) {
+        const { data: existing } = await supabase
+          .from('tasks')
+          .select('id')
+          .eq('id', task.id)
+          .maybeSingle()
+        
+        if (!existing) {
+          // Task doesn't exist, insert it
+          const { error: insertError } = await supabase
+            .from('tasks')
+            .insert({
+              id: task.id,
+              title: task.title,
+              completed: task.completed,
+              created_at: new Date(task.createdAt).toISOString(),
+              completed_at: task.completedAt ? new Date(task.completedAt).toISOString() : null,
+              pomodoro_count: task.pomodoroCount,
+              timer_state: task.timerState,
+            })
+            .select() // Return the inserted row
+          
+          if (insertError) {
+            console.error('Error inserting task to Supabase:', insertError)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing to Supabase:', error)
+    }
+  }
+
   watch(
     [tasks, pomodoro],
     () => {
       _saveToStorage()
+      _syncToSupabase()
     },
     { deep: true, flush: 'sync' },
   )
@@ -329,7 +371,6 @@ export const useTodoStore = defineStore('todo', () => {
     tasks,
     pomodoro,
     storageWarning,
-    supabaseAuthenticated,
     bannerMessage: notifications.bannerMessage,
     activeTasks,
     completedTasks,

@@ -45,7 +45,6 @@ export type Database = {
           completed_at: string | null
           created_at: string | null
           id: string
-          owner_id: string
           pomodoro_count: number | null
           timer_state: Json | null
           title: string
@@ -55,7 +54,6 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           id?: string
-          owner_id: string
           pomodoro_count?: number | null
           timer_state?: Json | null
           title: string
@@ -65,7 +63,6 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           id?: string
-          owner_id?: string
           pomodoro_count?: number | null
           timer_state?: Json | null
           title?: string

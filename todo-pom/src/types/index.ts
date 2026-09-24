@@ -35,13 +35,12 @@ export interface AppState {
 // Supabase types
 export type SupabaseTask = {
   id: string
-  owner_id: string
   title: string
   completed: boolean | null
   created_at: string | null
   completed_at: string | null
   pomodoro_count: number | null
-  timer_state: { phase: string; secondsLeft: number } | null
+  timer_state: { phase: PomodoroPhase; secondsLeft: number } | null
 }
 
 // Utility functions to convert between Supabase and app types
@@ -60,7 +59,6 @@ export function mapSupabaseTaskToApp(task: SupabaseTask): Task {
 export function mapAppTaskToSupabase(task: Task): SupabaseTask {
   return {
     id: task.id,
-    owner_id: '', // Will be set by auth
     title: task.title,
     completed: task.completed,
     created_at: task.createdAt ? new Date(task.createdAt).toISOString() : new Date().toISOString(),
