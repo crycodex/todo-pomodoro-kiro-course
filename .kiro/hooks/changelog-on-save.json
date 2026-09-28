@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Changelog Generator",
+      "trigger": "PostFileSave",
+      "description": "Generate changelog entry when saving TypeScript or Vue files",
+      "matcher": "\\.(ts|vue)$",
+      "action": {
+        "type": "command",
+        "command": "cd /Volumes/Second\\ Memory/dev/web/vue/todo-pomodoro/todo-pom && node .kiro/hooks/changelogGenerator.js \"$FILE_PATH\""
+      }
+    }
+  ]
+}
