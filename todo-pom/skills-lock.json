@@ -56,6 +56,11 @@
       "sourceType": "autoskills-registry",
       "computedHash": "1f369104c1aac5c101d71b65a2bd317ad2a1d3ceda160cb5d45da9b389a3f53f"
     },
+    "vue-debug-guides": {
+      "source": "hyf0/vue-skills",
+      "sourceType": "autoskills-registry",
+      "computedHash": "ef84274bb3af820e3ede22cb55863e6b0755eabe597713707ae9051a81ef3a02"
+    },
     "vue-pinia-best-practices": {
       "source": "vuejs-ai/skills",
       "sourceType": "autoskills-registry",
