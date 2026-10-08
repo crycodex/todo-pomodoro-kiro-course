@@ -30,6 +30,11 @@ const hasTimer = computed(() => {
   return !!props.task.timerState && props.task.timerState.phase !== 'idle'
 })
 
+// Limit dots to 8, show "N+" after that
+const DOTS_MAX = 8
+const pomodoroDotsCount = computed(() => Math.min(props.task.pomodoroCount, DOTS_MAX))
+const pomodoroOverflow = computed(() => props.task.pomodoroCount > DOTS_MAX)
+
 async function beginEdit(): Promise<void> {
   if (props.task.completed) return
   draft.value = props.task.title
@@ -65,7 +70,17 @@ function onPomodoroClick(): void {
 </script>
 
 <template>
-  <article class="item" :class="{ completed: task.completed, active: isActive, 'has-timer': hasTimer, 'timer-paused': timerStatus === 'paused', 'timer-running': timerStatus === 'running' }">
+  <article
+    v-memo="[task.id, task.title, task.completed, task.pomodoroCount, task.timerState?.phase, task.timerState?.secondsLeft, isActive]"
+    class="item"
+    :class="{
+      'is-completed': task.completed,
+      'is-active': isActive && timerStatus === 'running',
+      'is-paused': timerStatus === 'paused',
+      'is-editing': editing,
+    }"
+  >
+    <!-- Checkbox -->
     <button
       class="check"
       type="button"
@@ -73,9 +88,14 @@ function onPomodoroClick(): void {
       :aria-label="task.completed ? 'Marcar como pendiente' : 'Marcar como completada'"
       @click="emit('toggle-complete', task.id)"
     >
-      <span class="box" :class="{ on: task.completed }" />
+      <span class="check-ring" :class="{ checked: task.completed }" aria-hidden="true">
+        <svg v-if="task.completed" class="check-mark" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4L3.8 7L9 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
     </button>
 
+    <!-- Body -->
     <div class="body">
       <input
         v-if="editing"
@@ -92,38 +112,81 @@ function onPomodoroClick(): void {
         class="title"
         :class="{ done: task.completed }"
         @dblclick="beginEdit"
-      >
-        {{ task.title }}
-      </p>
-      <p class="meta">
-        <span v-if="task.timerState">{{ formatTime(task.timerState.secondsLeft) }} • </span>
-        {{ task.pomodoroCount }} {{ task.pomodoroCount === 1 ? 'ciclo' : 'ciclos' }}
-      </p>
+      >{{ task.title }}</p>
+
+      <!-- Meta: timer time + pomodoro dots -->
+      <div class="meta">
+        <span v-if="hasTimer" class="timer-time">
+          {{ formatTime(task.timerState!.secondsLeft) }}
+        </span>
+        <span
+          v-if="task.pomodoroCount > 0"
+          class="pomo-dots"
+          :title="`${task.pomodoroCount} ${task.pomodoroCount === 1 ? 'ciclo completado' : 'ciclos completados'}`"
+          :aria-label="`${task.pomodoroCount} ${task.pomodoroCount === 1 ? 'ciclo completado' : 'ciclos completados'}`"
+        >
+          <span
+            v-for="i in pomodoroDotsCount"
+            :key="i"
+            class="dot"
+            aria-hidden="true"
+          />
+          <span v-if="pomodoroOverflow" class="dot-overflow" aria-hidden="true">+</span>
+        </span>
+      </div>
     </div>
 
+    <!-- Actions -->
     <div class="actions">
-      <span v-if="hasTimer" class="timer-indicator" :class="timerStatus"></span>
+      <!-- Edit button — visible on hover and always focusable -->
+      <button
+        v-if="!task.completed && !editing"
+        class="icon-btn edit-btn"
+        type="button"
+        aria-label="Editar tarea"
+        @click="beginEdit"
+      >
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M9.5 2L12 4.5L4.5 12H2v-2.5L9.5 2Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <!-- Pomodoro toggle -->
       <button
         v-if="!task.completed"
-        class="icon-btn"
+        class="icon-btn pomo-btn"
+        :class="{ 'pomo-active': timerStatus !== 'idle' }"
         type="button"
-        :aria-label="
-          timerStatus === 'idle'
-            ? 'Iniciar pomodoro'
-            : 'Cancelar pomodoro'
-        "
-        :title="timerStatus === 'idle' ? 'Iniciar' : 'Cancelar'"
+        :aria-label="timerStatus === 'idle' ? 'Iniciar pomodoro' : 'Cancelar pomodoro'"
         @click="onPomodoroClick"
       >
-        <span class="glyph" :class="timerStatus" />
+        <!-- Play triangle -->
+        <svg v-if="timerStatus === 'idle'" aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 2l9 5-9 5V2Z" fill="currentColor"/>
+        </svg>
+        <!-- Pause bars (running) -->
+        <svg v-else-if="timerStatus === 'running'" aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="2" y="2" width="3.5" height="10" rx="1" fill="currentColor"/>
+          <rect x="8.5" y="2" width="3.5" height="10" rx="1" fill="currentColor"/>
+        </svg>
+        <!-- Resume arrow (paused) -->
+        <svg v-else aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 2l9 5-9 5V2Z" fill="currentColor" opacity="0.5"/>
+          <circle cx="10.5" cy="10.5" r="3.5" fill="var(--system-orange)"/>
+          <path d="M9.5 10.5h2M10.5 9.5v2" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
       </button>
+
+      <!-- Delete -->
       <button
-        class="icon-btn danger"
+        class="icon-btn delete-btn"
         type="button"
         aria-label="Eliminar tarea"
         @click="emit('delete', task.id)"
       >
-        ×
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
       </button>
     </div>
   </article>
@@ -133,85 +196,105 @@ function onPomodoroClick(): void {
 .item {
   display: grid;
   grid-template-columns: var(--tap) minmax(0, 1fr) auto;
-  gap: var(--space-1);
   align-items: center;
-  min-height: 56px;
-  padding: var(--space-1) var(--space-2);
+  min-height: 60px;
+  padding: var(--space-2) var(--space-2) var(--space-2) 0;
   border-bottom: 1px solid var(--divider);
-  transition: background-color var(--duration-theme) var(--ease-ios-spring);
+  /* Left accent border — always present to avoid layout shift */
+  border-left: 3px solid transparent;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-left-color var(--duration-base) var(--ease-out);
 }
 
-.item.active {
-  background: var(--fill-secondary);
-  margin-inline: -8px;
-  padding-inline: 8px;
+.item:last-child {
+  border-bottom: none;
 }
 
-.item.completed {
-  opacity: 0.7;
+.item:hover .edit-btn {
+  opacity: 1;
 }
 
-.check,
-.icon-btn {
+/* State: active (running pomodoro) */
+.item.is-active {
+  border-left-color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+/* State: paused pomodoro */
+.item.is-paused {
+  border-left-color: var(--system-orange);
+  background: rgba(217, 122, 26, 0.05);
+}
+
+/* State: completed */
+.item.is-completed {
+  opacity: 0.6;
+}
+
+/* ── Checkbox ── */
+.check {
   width: var(--tap);
   height: var(--tap);
   border: 0;
   background: transparent;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
 }
 
-.box {
-  width: 26px;
-  height: 26px;
+.check:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+  border-radius: var(--radius-full);
+}
+
+.check-ring {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
   border: 2px solid var(--border);
-  border-radius: var(--radius-sm);
   background: transparent;
-  transition: background-color var(--duration-theme) var(--ease-ios-spring),
-              border-color var(--duration-theme) var(--ease-ios-spring),
-              transform var(--duration-theme) var(--ease-ios-spring);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  transition:
+    background-color var(--duration-base) var(--ease-spring),
+    border-color var(--duration-base) var(--ease-spring),
+    transform var(--duration-fast) var(--ease-spring);
 }
 
-.box.on {
-  background: var(--system-blue);
-  border-color: var(--system-blue);
-}
-
-.check:active .box {
+.check-ring.checked {
+  background: var(--accent);
+  border-color: var(--accent);
   transform: scale(1.05);
 }
 
+.check:active .check-ring {
+  transform: scale(0.9);
+}
+
+.check-mark {
+  width: 10px;
+  height: 8px;
+}
+
+/* ── Body ── */
 .body {
   min-width: 0;
-}
-
-.title,
-.edit {
-  margin: 0;
-  font-size: 1rem;
-  width: 100%;
-  font-family: inherit;
-  color: var(--label-primary);
-}
-
-.title {
   padding: var(--space-1) 0;
 }
 
-.edit {
-  min-height: 36px;
-  border: 0;
-  border-bottom: 2px solid var(--border);
-  background: transparent;
-  padding: 0;
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  color: inherit;
-}
-
-.edit:focus {
-  border-bottom-color: var(--system-blue);
-  outline: none;
+.title {
+  margin: 0;
+  font-size: 0.975rem;
+  font-weight: 400;
+  color: var(--label-primary);
+  line-height: 1.4;
+  /* Allow long words to break */
+  overflow-wrap: break-word;
+  word-break: break-word;
+  cursor: default;
 }
 
 .title.done {
@@ -219,77 +302,113 @@ function onPomodoroClick(): void {
   color: var(--label-tertiary);
 }
 
-.meta {
-  margin: var(--space-1) 0 0;
-  font-size: 0.75rem;
-  color: var(--label-tertiary);
+.edit {
+  width: 100%;
+  margin: 0;
+  padding: 2px 0;
+  border: 0;
+  border-bottom: 2px solid var(--accent);
+  background: transparent;
+  font-size: 0.975rem;
+  font-family: var(--font-sans);
+  color: var(--label-primary);
+  outline: none;
 }
 
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: 2px;
+}
+
+.timer-time {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--label-tertiary);
+  letter-spacing: 0.02em;
+}
+
+.pomo-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--label-tertiary);
+  flex-shrink: 0;
+}
+
+.dot-overflow {
+  font-size: 0.65rem;
+  color: var(--label-tertiary);
+  line-height: 1;
+  margin-left: 1px;
+}
+
+/* ── Actions ── */
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
-}
-
-.timer-indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
-}
-
-.timer-indicator.running {
-  background: var(--system-green);
-  animation: pulse 1s ease-in-out infinite;
-}
-
-.timer-indicator.paused {
-  background: var(--system-orange);
-}
-
-.timer-indicator.idle {
-  background: transparent;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  gap: 2px;
 }
 
 .icon-btn {
-  font-size: 1.4rem;
-  color: var(--label-primary);
-  cursor: pointer;
+  width: var(--tap);
+  height: var(--tap);
+  border: 0;
+  background: transparent;
   border-radius: var(--radius-md);
-  transition: background-color var(--duration-theme) var(--ease-ios-spring);
+  color: var(--label-tertiary);
+  display: grid;
+  place-items: center;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
 .icon-btn:hover {
   background: var(--fill-secondary);
+  color: var(--label-primary);
 }
 
-.icon-btn.danger:hover {
-  background: rgba(255, 59, 48, 0.1);
+.icon-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-.glyph {
-  display: block;
-  width: 14px;
-  height: 14px;
-  background: var(--label-primary);
+/* Edit btn — hidden until hover (but always focusable) */
+.edit-btn {
+  opacity: 0;
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
-.glyph.idle {
-  clip-path: polygon(12% 8%, 92% 50%, 12% 92%);
+/* Always show edit button when item has focus-within (keyboard nav) */
+.item:focus-within .edit-btn {
+  opacity: 1;
 }
 
-.glyph.running {
-  clip-path: none;
+/* Pomo active state — show accent color */
+.pomo-btn.pomo-active {
+  color: var(--accent);
 }
 
-.glyph.paused {
-  width: 12px;
-  background:
-    linear-gradient(var(--label-primary), var(--label-primary)) 0 0 / 4px 100% no-repeat,
-    linear-gradient(var(--label-primary), var(--label-primary)) 8px 0 / 4px 100% no-repeat;
+.pomo-btn.pomo-active:hover {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+/* Delete hover — red tint */
+.delete-btn:hover {
+  background: rgba(217, 64, 64, 0.08);
+  color: var(--system-red);
 }
 </style>

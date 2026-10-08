@@ -6,54 +6,62 @@ const store = useTodoStore()
 </script>
 
 <template>
-  <section class="list" aria-label="Tareas pendientes">
+  <section class="list" aria-label="Tareas pendientes" aria-live="polite">
+    <TransitionGroup name="task" tag="div" class="list-inner">
+      <TaskItem
+        v-for="task in store.activeTasks"
+        :key="task.id"
+        :task="task"
+        :is-active="store.pomodoro.taskId === task.id && store.pomodoro.phase !== 'idle'"
+        @toggle-complete="store.toggleComplete"
+        @edit="store.editTask"
+        @delete="store.deleteTask"
+        @start-pomodoro="store.startPomodoro"
+        @cancel-pomodoro="store.cancelPomodoro"
+      />
+    </TransitionGroup>
     <p v-if="store.activeTasks.length === 0" class="empty">
       Añade una tarea para empezar.
     </p>
-    <TaskItem
-      v-for="task in store.activeTasks"
-      :key="task.id"
-      :task="task"
-      :is-active="store.pomodoro.taskId === task.id && store.pomodoro.phase !== 'idle'"
-      @toggle-complete="store.toggleComplete"
-      @edit="store.editTask"
-      @delete="store.deleteTask"
-      @start-pomodoro="store.startPomodoro"
-      @cancel-pomodoro="store.cancelPomodoro"
-    />
   </section>
 </template>
 
 <style scoped>
 .list {
-  background: var(--bg-grouped);
+  background: var(--bg-surface);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--duration-theme) var(--ease-smooth);
 }
 
-.list .empty {
-  margin: var(--space-4) var(--space-2);
+.list-inner {
+  display: contents;
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-6) var(--space-4);
   color: var(--label-tertiary);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  text-align: center;
 }
 
-.list .item {
-  display: grid;
-  grid-template-columns: var(--tap) minmax(0, 1fr) auto;
-  gap: var(--space-1);
-  align-items: center;
-  min-height: 56px;
-  padding: var(--space-1) var(--space-2);
-  border-bottom: 1px solid var(--divider);
-  transition: background-color var(--duration-theme) var(--ease-ios-spring);
+/* Task enter/leave transitions */
+.task-enter-active,
+.task-leave-active {
+  transition:
+    opacity var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
 }
 
-.list .item:hover {
-  background: var(--fill-secondary);
+.task-enter-from {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
-.list .item:last-child {
-  border-bottom: none;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+.task-leave-to {
+  opacity: 0;
+  transform: translateX(8px);
 }
 </style>

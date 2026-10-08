@@ -358,13 +358,33 @@ export const useTodoStore = defineStore('todo', () => {
     }
   }
 
+  // ── Performance: split watches to avoid N Supabase calls per second ──
+
+  // Watch 1: persist to localStorage on every state change (tasks + pomodoro)
+  // flush:'post' is safe here — localStorage is synchronous, no recursive risk
   watch(
     [tasks, pomodoro],
-    () => {
-      _saveToStorage()
-      _syncToSupabase()
-    },
-    { deep: true, flush: 'sync' },
+    () => { _saveToStorage() },
+    { deep: true, flush: 'post' },
+  )
+
+  // Watch 2: debounced Supabase sync — only watches tasks (not the per-second pomodoro tick)
+  let _supabaseDebounceTimer: number | null = null
+
+  function _debouncedSyncToSupabase(): void {
+    if (_supabaseDebounceTimer !== null) {
+      clearTimeout(_supabaseDebounceTimer)
+    }
+    _supabaseDebounceTimer = window.setTimeout(() => {
+      void _syncToSupabase()
+      _supabaseDebounceTimer = null
+    }, 2000)
+  }
+
+  watch(
+    tasks,
+    () => { _debouncedSyncToSupabase() },
+    { deep: true, flush: 'post' },
   )
 
   return {
