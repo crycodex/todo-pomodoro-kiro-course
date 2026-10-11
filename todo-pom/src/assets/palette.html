@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paleta de Colores - todo-pom</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #f7f6f3;
+      color: #1c1c1a;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 300;
+      margin-bottom: 10px;
+      letter-spacing: -0.025em;
+    }
+
+    .description {
+      color: #767672;
+      margin-bottom: 30px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .theme-toggle {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle {
+      background: #C45B3A;
+      color: white;
+    }
+
+    .theme-toggle:hover {
+      background: #AE4F30;
+    }
+
+    .palette-group {
+      margin-bottom: 30px;
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(28, 28, 26, 0.06);
+    }
+
+    .palette-group.dark {
+      background: #1C1C1A;
+    }
+
+    .palette-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(28, 28, 26, 0.08);
+    }
+
+    .palette-group.dark .palette-title {
+      border-bottom: 1px solid rgba(240, 237, 232, 0.08);
+      color: #F0EDE8;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .color-card {
+      background: white;
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+      border: 2px solid transparent;
+    }
+
+    .color-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(28, 28, 26, 0.1);
+    }
+
+    .color-card.dark {
+      background: #2C2C2A;
+    }
+
+    .color-swatch {
+      width: 100%;
+      height: 60px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+    }
+
+    .color-code {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1c1c1a;
+      padding: 4px 8px;
+      border-radius: 6px;
+      position: absolute;
+      bottom: 8px;
+      font-weight: 500;
+    }
+
+    .color-card.dark .color-code {
+      background: rgba(0, 0, 0, 0.7);
+      color: #F0EDE8;
+    }
+
+    .color-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .color-category {
+      font-size: 0.75rem;
+      color: #767672;
+      margin-top: 4px;
+    }
+
+    .color-card.dark .color-category {
+      color: #A8A49E;
+    }
+
+    .contrast-test {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .contrast-box {
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .copy-feedback {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2D9B6F;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .copy-feedback.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Paleta de Colores</h1>
+    <p class="description">Colores utilizados en todo-pom para both light y dark theme. Haz clic en cualquier color para copiar su código.</p>
+    
+    <button class="theme-toggle" id="themeToggle">Switch to Dark Theme</button>
+
+    <!-- Light Theme Colors -->
+    <div class="palette-group" id="lightPalette">
+      <div class="palette-title">Light Theme</div>
+      <div class="color-grid" id="lightGrid"></div>
+    </div>
+
+    <!-- Dark Theme Colors -->
+    <div class="palette-group dark" id="darkPalette" style="display: none;">
+      <div class="palette-title">Dark Theme</div>
+      <div class="color-grid" id="darkGrid"></div>
+    </div>
+
+    <!-- Semantic Colors -->
+    <div class="palette-group" id="semanticPalette">
+      <div class="palette-title">Colores Semánticos</div>
+      <div class="color-grid" id="semanticGrid"></div>
+    </div>
+
+    <!-- Contrast Tests -->
+    <div class="palette-group" id="contrastPalette">
+      <div class="palette-title">Prueba de Contraste</div>
+      <div class="contrast-test" id="contrastTest"></div>
+    </div>
+  </div>
+
+  <div class="copy-feedback" id="copyFeedback">¡Color copiado!</div>
+
+  <script>
+    // Light theme colors
+    const lightColors = [
+      { code: '#F7F6F3', name: 'bg-app', category: 'Fondo principal' },
+      { code: '#FFFFFF', name: 'bg-surface', category: 'Superficie' },
+      { code: 'rgba(255, 255, 255, 0.88)', name: 'bg-card', category: 'Tarjeta' },
+      { code: 'rgba(255, 255, 255, 0.94)', name: 'bg-sheet', category: 'Panel' },
+      { code: '#1C1C1A', name: 'label-primary', category: 'Texto principal' },
+      { code: '#5C5C58', name: 'label-secondary', category: 'Texto secundario' },
+      { code: '#767672', name: 'label-tertiary', category: 'Texto terciario' },
+      { code: '#A8A8A4', name: 'label-quaternary', category: 'Texto cuaternario' },
+      { code: '#C45B3A', name: 'accent', category: 'Acento' },
+      { code: '#AE4F30', name: 'accent-hover', category: 'Hover' },
+      { code: 'rgba(196, 91, 58, 0.08)', name: 'accent-subtle', category: 'Sutil' },
+      { code: 'rgba(196, 91, 58, 0.15)', name: 'accent-muted', category: 'Atenuado' },
+    ];
+
+    // Dark theme colors
+    const darkColors = [
+      { code: '#111110', name: 'bg-app', category: 'Fondo principal' },
+      { code: '#1C1C1A', name: 'bg-surface', category: 'Superficie' },
+      { code: 'rgba(28, 28, 26, 0.88)', name: 'bg-card', category: 'Tarjeta' },
+      { code: 'rgba(28, 28, 26, 0.94)', name: 'bg-sheet', category: 'Panel' },
+      { code: '#F0EDE8', name: 'label-primary', category: 'Texto principal' },
+      { code: '#A8A49E', name: 'label-secondary', category: 'Texto secundario' },
+      { code: '#7A7672', name: 'label-tertiary', category: 'Texto terciario' },
+      { code: '#504E4A', name: 'label-quaternary', category: 'Texto cuaternario' },
+      { code: '#E07055', name: 'accent', category: 'Acento' },
+      { code: '#CC6248', name: 'accent-hover', category: 'Hover' },
+      { code: 'rgba(224, 112, 85, 0.10)', name: 'accent-subtle', category: 'Sutil' },
+      { code: 'rgba(224, 112, 85, 0.18)', name: 'accent-muted', category: 'Atenuado' },
+    ];
+
+    // Semantic colors
+    const semanticColors = [
+      { code: '#2D9B6F', name: 'system-green', category: 'Éxito' },
+      { code: '#D97A1A', name: 'system-orange', category: 'Advertencia' },
+      { code: '#D94040', name: 'system-red', category: 'Error' },
+      { code: '#3B72D9', name: 'system-blue', category: 'Información' },
+      { code: 'rgba(28, 28, 26, 0.08)', name: 'border', category: 'Borde' },
+      { code: 'rgba(28, 28, 26, 0.06)', name: 'divider', category: 'Divisor' },
+    ];
+
+    // Contrast test colors
+    const contrastTests = [
+      { bg: '#C45B3A', text: '#FFFFFF', name: 'Accent on White' },
+      { bg: '#FFFFFF', text: '#1C1C1A', name: 'White on Black' },
+      { bg: '#F7F6F3', text: '#1C1C1A', name: 'Off-white on Black' },
+      { bg: '#767672', text: '#FFFFFF', name: 'Tertiary on White' },
+    ];
+
+    function createColorCard(color, isDark = false) {
+      const card = document.createElement('div');
+      card.className = isDark ? 'color-card dark' : 'color-card';
+      card.dataset.code = color.code;
+      card.innerHTML = `
+        <div class="color-swatch" style="background-color: ${color.code}">
+          <span class="color-code">${color.code}</span>
+        </div>
+        <div class="color-name">${color.name}</div>
+        <div class="color-category">${color.category}</div>
+      `;
+      card.addEventListener('click', () => copyColor(color.code));
+      return card;
+    }
+
+    function copyColor(code) {
+      navigator.clipboard.writeText(code);
+      const feedback = document.getElementById('copyFeedback');
+      feedback.classList.add('show');
+      setTimeout(() => feedback.classList.remove('show'), 2000);
+    }
+
+    function renderLightColors() {
+      const grid = document.getElementById('lightGrid');
+      lightColors.forEach(color => grid.appendChild(createColorCard(color, false)));
+    }
+
+    function renderDarkColors() {
+      const grid = document.getElementById('darkGrid');
+      darkColors.forEach(color => grid.appendChild(createColorCard(color, true)));
+    }
+
+    function renderSemanticColors() {
+      const grid = document.getElementById('semanticGrid');
+      semanticColors.forEach(color => grid.appendChild(createColorCard(color, false)));
+    }
+
+    function renderContrastTest() {
+      const container = document.getElementById('contrastTest');
+      contrastTests.forEach(test => {
+        const box = document.createElement('div');
+        box.className = 'contrast-box';
+        box.style.backgroundColor = test.bg;
+        box.style.color = test.text;
+        box.textContent = test.name;
+        container.appendChild(box);
+      });
+    }
+
+    function toggleTheme() {
+      const root = document.documentElement;
+      const lightPalette = document.getElementById('lightPalette');
+      const darkPalette = document.getElementById('darkPalette');
+      const themeToggle = document.getElementById('themeToggle');
+
+      const isDark = root.getAttribute('data-theme') === 'dark';
+      
+      if (isDark) {
+        root.removeAttribute('data-theme');
+        lightPalette.style.display = 'block';
+        darkPalette.style.display = 'none';
+        themeToggle.textContent = 'Switch to Dark Theme';
+      } else {
+        root.setAttribute('data-theme', 'dark');
+        lightPalette.style.display = 'none';
+        darkPalette.style.display = 'block';
+        themeToggle.textContent = 'Switch to Light Theme';
+      }
+    }
+
+    // Initialize
+    renderLightColors();
+    renderDarkColors();
+    renderSemanticColors();
+    renderContrastTest();
+
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+  </script>
+</body>
+</html>

@@ -1,8 +1,11 @@
 <script setup lang="ts">
-defineProps<{
+withDefaults(defineProps<{
   storageWarning?: boolean
-  isDark: boolean
-}>()
+  isDark?: boolean
+}>(), {
+  storageWarning: false,
+  isDark: false,
+})
 
 defineEmits<{
   'toggle-theme': []
@@ -22,7 +25,7 @@ defineEmits<{
           <path d="M6 5V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           <circle cx="6" cy="9" r="0.75" fill="currentColor"/>
         </svg>
-        Sin guardar
+        No se puede guardar el estado
       </p>
 
       <button

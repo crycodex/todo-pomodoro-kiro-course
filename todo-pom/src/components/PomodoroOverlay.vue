@@ -51,6 +51,7 @@ const minuteAnnouncement = computed(() => {
 
 <template>
   <aside
+    v-if="timerState.phase !== 'idle'"
     class="overlay"
     :class="{ 'is-break': isBreak, 'is-paused': isPaused }"
     aria-label="Temporizador Pomodoro activo"

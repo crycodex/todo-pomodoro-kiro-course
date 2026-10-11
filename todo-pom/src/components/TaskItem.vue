@@ -35,13 +35,14 @@ const DOTS_MAX = 8
 const pomodoroDotsCount = computed(() => Math.min(props.task.pomodoroCount, DOTS_MAX))
 const pomodoroOverflow = computed(() => props.task.pomodoroCount > DOTS_MAX)
 
-async function beginEdit(): Promise<void> {
+function beginEdit(): void {
   if (props.task.completed) return
   draft.value = props.task.title
   editing.value = true
-  await nextTick()
-  editInput.value?.focus()
-  editInput.value?.select()
+  nextTick(() => {
+    editInput.value?.focus()
+    editInput.value?.select()
+  })
 }
 
 function confirmEdit(): void {
@@ -98,7 +99,7 @@ function onPomodoroClick(): void {
     <!-- Body -->
     <div class="body">
       <input
-        v-if="editing"
+        v-show="editing"
         ref="editInput"
         v-model="draft"
         class="edit"
@@ -108,7 +109,7 @@ function onPomodoroClick(): void {
         @blur="confirmEdit"
       />
       <p
-        v-else
+        v-show="!editing"
         class="title"
         :class="{ done: task.completed }"
         @dblclick="beginEdit"
@@ -118,6 +119,14 @@ function onPomodoroClick(): void {
       <div class="meta">
         <span v-if="hasTimer" class="timer-time">
           {{ formatTime(task.timerState!.secondsLeft) }}
+        </span>
+        <span
+          v-if="task.pomodoroCount > 0"
+          class="pomo-count"
+          :title="`${task.pomodoroCount} ${task.pomodoroCount === 1 ? 'ciclo completado' : 'ciclos completados'}`"
+          :aria-label="`${task.pomodoroCount} ${task.pomodoroCount === 1 ? 'ciclo completado' : 'ciclos completados'}`"
+        >
+          {{ task.pomodoroCount }} {{ task.pomodoroCount === 1 ? 'ciclo' : 'ciclos' }}
         </span>
         <span
           v-if="task.pomodoroCount > 0"
@@ -327,6 +336,11 @@ function onPomodoroClick(): void {
   font-size: 0.72rem;
   color: var(--label-tertiary);
   letter-spacing: 0.02em;
+}
+
+.pomo-count {
+  font-size: 0.72rem;
+  color: var(--label-tertiary);
 }
 
 .pomo-dots {

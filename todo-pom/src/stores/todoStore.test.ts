@@ -152,12 +152,23 @@ describe('useTodoStore', () => {
     it('sorts active and completed tasks as specified', () => {
       const store = useTodoStore()
       store.tasks = [
-        { id: '1', title: 'Task 1', completed: false, createdAt: 1000, completedAt: null, pomodoroCount: 0, timerState: null },
-        { id: '2', title: 'Task 2', completed: true, createdAt: 2000, completedAt: 4000, pomodoroCount: 0, timerState: null },
-        { id: '3', title: 'Task 3', completed: false, createdAt: 3000, completedAt: null, pomodoroCount: 0, timerState: null },
+        { id: '1', title: 'Task 1', completed: false, createdAt: 1000, completedAt: null, pomodoroCount: 0, timerState: null, category: 'Work', priority: 'Medium', description: '', dueDate: null, tags: [], status: 'todo' },
+        { id: '2', title: 'Task 2', completed: true, createdAt: 2000, completedAt: 4000, pomodoroCount: 0, timerState: null, category: 'Personal', priority: 'High', description: '', dueDate: null, tags: [], status: 'done' },
+        { id: '3', title: 'Task 3', completed: false, createdAt: 3000, completedAt: null, pomodoroCount: 0, timerState: null, category: 'Study', priority: 'Low', description: '', dueDate: null, tags: [], status: 'todo' },
       ]
       expect(store.activeTasks.map((task) => task.title)).toEqual(['Task 3', 'Task 1'])
       expect(store.completedTasks.map((task) => task.title)).toEqual(['Task 2'])
+    })
+
+    it('applies category and priority filters to active tasks', () => {
+      const store = useTodoStore()
+      store.tasks = [
+        { id: '1', title: 'Work task', completed: false, createdAt: 1000, completedAt: null, pomodoroCount: 0, timerState: null, category: 'Work', priority: 'High', description: '', dueDate: null, tags: ['ops'], status: 'todo' },
+        { id: '2', title: 'Study task', completed: false, createdAt: 2000, completedAt: null, pomodoroCount: 0, timerState: null, category: 'Study', priority: 'Low', description: '', dueDate: null, tags: ['analysis'], status: 'todo' },
+      ]
+      store.filters.category = 'Work'
+      store.filters.priority = ['High']
+      expect(store.activeTasks.map((task) => task.title)).toEqual(['Work task'])
     })
   })
 })

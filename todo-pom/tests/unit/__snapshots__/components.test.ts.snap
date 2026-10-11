@@ -1,15 +1,20 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`presentational snapshots > renders BreakTimer with formatted time 1`] = `
-"<div data-v-b476927d="" class="break-timer" role="status">
-  <p data-v-b476927d="" class="label">Descanso</p>
-  <p data-v-b476927d="" class="time">05:00</p>
-</div>"
-`;
+exports[`presentational snapshots > renders BreakTimer with formatted time 1`] = `"<div data-v-b476927d="" class="break-timer" aria-live="polite" aria-atomic="true"><span data-v-b476927d="" class="label">Descanso</span><strong data-v-b476927d="" class="time">05:00</strong></div>"`;
 
 exports[`presentational snapshots > renders TheHeader with a storage warning 1`] = `
-"<header data-v-6c285e9a="" class="header">
-  <p data-v-6c285e9a="" class="brand">todo-pom</p>
-  <p data-v-6c285e9a="" class="warning" role="status"> No se puede guardar el estado </p>
+"<header data-v-6c285e9a="" id="site-header" class="header">
+  <p data-v-6c285e9a="" class="brand"> todo-pom<span data-v-6c285e9a="" class="brand-dot" aria-hidden="true">.</span></p>
+  <div data-v-6c285e9a="" class="header-end">
+    <p data-v-6c285e9a="" class="storage-badge" role="status"><svg data-v-6c285e9a="" aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path data-v-6c285e9a="" d="M6 1L11 10H1L6 1Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+        <path data-v-6c285e9a="" d="M6 5V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+        <circle data-v-6c285e9a="" cx="6" cy="9" r="0.75" fill="currentColor"></circle>
+      </svg> No se puede guardar el estado </p><button data-v-6c285e9a="" class="theme-toggle" type="button" aria-label="Activar modo oscuro">
+      <!-- Moon icon — shown in light mode (click to go dark) --><svg data-v-6c285e9a="" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path data-v-6c285e9a="" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+  </div>
 </header>"
 `;
