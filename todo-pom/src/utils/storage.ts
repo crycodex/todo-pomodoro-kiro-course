@@ -1,4 +1,4 @@
-import type { AppState, PomodoroPhase, Task, TaskFilterState, TaskPriority, TaskStatus, TaskViewMode } from '../types'
+import type { AppState, PomodoroPhase, Task, TaskFilterState, TaskPriority, TaskViewMode } from '../types'
 import { DEFAULT_TASK_CATEGORIES, DEFAULT_TASK_PRIORITIES } from '../types'
 import { STORAGE_KEY } from './constants'
 

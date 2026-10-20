@@ -83,6 +83,15 @@ export const useTodoStore = defineStore('todo', () => {
   const pomodoro = ref<PomodoroState>(createIdlePomodoro())
   const storageWarning = ref(false)
 
+  // Undo-delete state: stores the deleted task and a timer handle
+  interface PendingDelete {
+    task: Task
+    index: number
+    timerId: number
+  }
+  const pendingDelete = ref<PendingDelete | null>(null)
+  const UNDO_TIMEOUT_MS = 4500
+
   // Computed properties
   const filteredTasks = computed(() => {
     return [...tasks.value]
@@ -217,10 +226,43 @@ export const useTodoStore = defineStore('todo', () => {
   }
 
   function deleteTask(id: string): void {
+    // If there's already a pending delete, flush it first
+    if (pendingDelete.value) {
+      _flushPendingDelete()
+    }
+
+    const index = tasks.value.findIndex((t) => t.id === id)
+    if (index === -1) return
+    const task = tasks.value[index]!
+
     if (pomodoro.value.taskId === id) {
       cancelPomodoro()
     }
-    tasks.value = tasks.value.filter((task) => task.id !== id)
+
+    // Remove from list immediately (UI feedback) but keep for undo
+    tasks.value.splice(index, 1)
+
+    const timerId = window.setTimeout(() => {
+      pendingDelete.value = null
+    }, UNDO_TIMEOUT_MS)
+
+    pendingDelete.value = { task, index, timerId }
+  }
+
+  function undoDelete(): void {
+    if (!pendingDelete.value) return
+    const { task, index, timerId } = pendingDelete.value
+    window.clearTimeout(timerId)
+    pendingDelete.value = null
+    // Re-insert at original position (clamped to current length)
+    const safeIndex = Math.min(index, tasks.value.length)
+    tasks.value.splice(safeIndex, 0, task)
+  }
+
+  function _flushPendingDelete(): void {
+    if (!pendingDelete.value) return
+    window.clearTimeout(pendingDelete.value.timerId)
+    pendingDelete.value = null
   }
 
   function toggleComplete(id: string): void {
@@ -257,21 +299,20 @@ export const useTodoStore = defineStore('todo', () => {
     _clearTimer()
     pomodoro.value.taskId = taskId
 
-    if (task.timerState) {
+    if (task.timerState && task.timerState.phase !== 'idle') {
+      // Restore previously saved timer state (e.g. resuming after switching tasks)
       pomodoro.value.phase = task.timerState.phase
       pomodoro.value.secondsLeft = task.timerState.secondsLeft
     } else {
       pomodoro.value.phase = 'work'
       pomodoro.value.secondsLeft = WORK_DURATION_SECONDS
+      task.timerState = {
+        phase: 'work',
+        secondsLeft: WORK_DURATION_SECONDS,
+      }
     }
 
     void notifications.requestPermission()
-
-    task.timerState = {
-      phase: 'work',
-      secondsLeft: WORK_DURATION_SECONDS,
-    }
-
     _startTimer()
   }
 
@@ -504,7 +545,9 @@ export const useTodoStore = defineStore('todo', () => {
     addCategory,
     addTask,
     editTask,
+    pendingDelete,
     deleteTask,
+    undoDelete,
     toggleComplete,
     setTaskStatus,
     startPomodoro,

@@ -26,8 +26,10 @@ const timerStatus = computed(() => {
   return 'running'
 })
 
+// Only show the live timer display when this task is the currently active pomodoro.
+// A task may have a saved timerState from a previous session even while another task runs.
 const hasTimer = computed(() => {
-  return !!props.task.timerState && props.task.timerState.phase !== 'idle'
+  return props.isActive && !!props.task.timerState && props.task.timerState.phase !== 'idle'
 })
 
 // Limit dots to 8, show "N+" after that

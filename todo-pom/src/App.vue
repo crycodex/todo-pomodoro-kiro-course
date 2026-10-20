@@ -9,6 +9,7 @@ import TaskList from './components/TaskList.vue'
 import CompletedList from './components/CompletedList.vue'
 import PomodoroOverlay from './components/PomodoroOverlay.vue'
 import type { TaskStatus } from './types'
+import UndoToast from './components/UndoToast.vue'
 
 const store = useTodoStore()
 const pomodoro = usePomodoro()
@@ -33,7 +34,9 @@ const boardColumns = computed(() => [
 
 function toggleTheme(): void {
   isDark.value = !isDark.value
-  document.documentElement.setAttribute('data-theme', isDark.value ? 'dark' : 'light')
+  const theme = isDark.value ? 'dark' : 'light'
+  document.documentElement.setAttribute('data-theme', theme)
+  localStorage.setItem(THEME_KEY, theme)
 }
 
 function clearFilters(): void {
@@ -57,14 +60,22 @@ function onDragStart(event: DragEvent, taskId: string): void {
   event.dataTransfer!.effectAllowed = 'move'
 }
 
+const THEME_KEY = 'todo-pom-theme'
+
 onMounted(() => {
   store._loadFromStorage()
 
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  // Restore saved theme, fall back to system preference
+  const saved = localStorage.getItem(THEME_KEY)
+  const prefersDark = saved !== null
+    ? saved === 'dark'
+    : window.matchMedia('(prefers-color-scheme: dark)').matches
   isDark.value = prefersDark
   document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light')
 
+  // Follow system preference only when user has not overridden it manually
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (localStorage.getItem(THEME_KEY) !== null) return
     isDark.value = e.matches
     document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light')
   })
@@ -204,6 +215,30 @@ watchEffect(() => {
               </div>
               <strong>{{ task.title }}</strong>
               <p v-if="task.description">{{ task.description.slice(0, 80) }}</p>
+              <div class="card-actions">
+                <button
+                  type="button"
+                  class="card-btn complete-btn"
+                  :aria-label="task.completed ? 'Marcar como pendiente' : 'Marcar como completada'"
+                  @click.stop="store.toggleComplete(task.id)"
+                >
+                  <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l2.8 3L10 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  {{ task.completed ? 'Reabrir' : 'Completar' }}
+                </button>
+                <button
+                  type="button"
+                  class="card-btn delete-btn"
+                  aria-label="Eliminar tarea"
+                  @click.stop="store.deleteTask(task.id)"
+                >
+                  <svg aria-hidden="true" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 2l8 8M10 2L2 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                  Eliminar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -222,6 +257,7 @@ watchEffect(() => {
         @cancel="pomodoro.cancel"
       />
     </main>
+    <UndoToast />
   </div>
 </template>
 
@@ -387,6 +423,44 @@ select {
   margin: 0;
   color: var(--label-secondary);
   font-size: 0.75rem;
+}
+.card-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+  opacity: 0;
+  transition: opacity var(--duration-fast, 0.12s) ease-out;
+}
+.kanban-card:hover .card-actions,
+.kanban-card:focus-within .card-actions {
+  opacity: 1;
+}
+.card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--label-secondary);
+  font-size: 0.7rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: background-color var(--duration-fast, 0.12s) ease-out, color var(--duration-fast, 0.12s) ease-out;
+}
+.card-btn:hover {
+  background: var(--fill-secondary);
+  color: var(--label-primary);
+}
+.card-btn.delete-btn:hover {
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+  border-color: rgba(239,68,68,0.3);
+}
+.card-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .kanban-empty {
