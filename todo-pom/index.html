@@ -1,130 +1,832 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>todo-pom - Productividad con Pomodoro</title>
-    <meta name="description" content="Aplicación de gestión de tareas con técnica Pomodoro" />
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>todo-pom — Trabaja en intervalos, termina lo que importa</title>
+  <meta name="description" content="Combina tus tareas con la técnica Pomodoro. Un timer por tarea, progreso visible, sin distracciones." />
 
-      body {
-        font-family: system-ui, -apple-system, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        color: #fff;
-      }
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
+  <style>
+    /* ─── Tokens (mirror del app) ─────────────────────────────── */
+    :root {
+      --bg-app:       #F7F6F3;
+      --bg-surface:   #FFFFFF;
+      --bg-card:      rgba(255, 255, 255, 0.88);
+
+      --label-primary:    #1C1C1A;
+      --label-secondary:  #5C5C58;
+      --label-tertiary:   #767672;
+
+      --accent:        #C45B3A;
+      --accent-hover:  #AE4F30;
+      --accent-subtle: rgba(196, 91, 58, 0.08);
+      --accent-muted:  rgba(196, 91, 58, 0.15);
+
+      --system-green:  #2D9B6F;
+
+      --border:   rgba(28, 28, 26, 0.08);
+      --divider:  rgba(28, 28, 26, 0.06);
+      --shadow-sm: 0 1px 4px rgba(28, 28, 26, 0.06), 0 0 0 1px rgba(28, 28, 26, 0.04);
+      --shadow-md: 0 4px 16px rgba(28, 28, 26, 0.08), 0 0 0 1px rgba(28, 28, 26, 0.04);
+      --shadow-lg: 0 8px 32px rgba(28, 28, 26, 0.10), 0 0 0 1px rgba(28, 28, 26, 0.04);
+
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'DM Mono', ui-monospace, monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 20px;
+      --radius-full: 9999px;
+
+      --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+      --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+    }
+
+    /* ─── Reset ───────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-app);
+      color: var(--label-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* ─── Accessibility ───────────────────────────────────────── */
+    .visually-hidden {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    .skip-link {
+      position: absolute; top: 12px; left: 12px; z-index: 9999;
+      padding: 8px 16px; background: var(--accent); color: #fff;
+      font-family: var(--font-sans); font-size: 0.9rem; font-weight: 500;
+      border-radius: var(--radius-md); text-decoration: none;
+      opacity: 0; pointer-events: none; transform: translateY(-4px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .skip-link:focus { opacity: 1; pointer-events: auto; transform: translateY(0); outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    /* ─── Nav ─────────────────────────────────────────────────── */
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(247, 246, 243, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-size: 1.25rem; font-weight: 300; letter-spacing: -0.025em;
+      color: var(--label-primary); text-decoration: none; line-height: 1;
+    }
+    .nav-brand span { color: var(--accent); font-weight: 500; }
+
+    .nav-cta {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 36px; padding: 0 18px;
+      background: var(--accent); color: #fff;
+      font-family: var(--font-sans); font-size: 0.875rem; font-weight: 500;
+      border: none; border-radius: var(--radius-full);
+      text-decoration: none; cursor: pointer;
+      transition: background-color 0.15s var(--ease-out), transform 0.15s var(--ease-spring), box-shadow 0.15s;
+    }
+    .nav-cta:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(196,91,58,0.30); }
+    .nav-cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    /* ─── Hero ────────────────────────────────────────────────── */
+    .hero {
+      min-height: calc(100svh - 56px);
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: center;
+      padding: 48px 24px 64px;
+      gap: 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 900px) {
       .hero {
-        text-align: center;
-        padding: 4rem 2rem;
+        grid-template-columns: 1fr 1fr;
+        padding: 80px 48px;
+        gap: 64px;
       }
+    }
 
-      .hero h1 {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    .hero-copy {
+      display: flex; flex-direction: column; gap: 28px;
+    }
+
+    .hero-label {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem; font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .hero-label-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .hero-headline {
+      font-size: clamp(2.25rem, 5vw, 3.5rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--label-primary);
+    }
+    .hero-headline strong {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1.125rem;
+      font-weight: 300;
+      color: var(--label-secondary);
+      line-height: 1.6;
+      max-width: 42ch;
+    }
+
+    .hero-actions {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 48px; padding: 0 28px;
+      background: var(--accent); color: #fff;
+      font-family: var(--font-sans); font-size: 1rem; font-weight: 500;
+      border: none; border-radius: var(--radius-full);
+      text-decoration: none; cursor: pointer;
+      transition: background-color 0.15s var(--ease-out), transform 0.2s var(--ease-spring), box-shadow 0.15s;
+    }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(196,91,58,0.35); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+    .btn-primary svg { flex-shrink: 0; }
+
+    .hero-note {
+      font-size: 0.8rem; color: var(--label-tertiary);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hero-note svg { color: var(--system-green); flex-shrink: 0; }
+
+    /* ─── App Preview ─────────────────────────────────────────── */
+    .hero-preview {
+      position: relative;
+      display: flex; justify-content: center; align-items: center;
+    }
+
+    .preview-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      padding: 24px;
+      width: 100%;
+      max-width: 380px;
+      display: flex; flex-direction: column; gap: 20px;
+      /* Entrance animation */
+      animation: card-enter 0.7s var(--ease-spring) both;
+      animation-delay: 0.2s;
+    }
+    @keyframes card-enter {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .preview-header {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .preview-brand {
+      font-size: 0.9rem; font-weight: 300; letter-spacing: -0.02em; color: var(--label-primary);
+    }
+    .preview-brand span { color: var(--accent); font-weight: 500; }
+
+    .preview-phase-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: var(--radius-full);
+      background: var(--accent-subtle);
+      font-family: var(--font-mono);
+      font-size: 0.7rem; font-weight: 500; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .preview-phase-badge::before {
+      content: '';
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Timer circle */
+    .timer-container {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+
+    .timer-ring {
+      position: relative; width: 120px; height: 120px;
+    }
+
+    .timer-ring svg {
+      width: 120px; height: 120px;
+      transform: rotate(-90deg);
+    }
+
+    .timer-ring-track {
+      fill: none;
+      stroke: var(--accent-subtle);
+      stroke-width: 6;
+    }
+
+    .timer-ring-progress {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 339.29;       /* 2π × 54 */
+      stroke-dashoffset: 84.82;       /* 25% used = 75% remaining */
+      animation: timer-run 25s linear infinite;
+    }
+    @keyframes timer-run {
+      from { stroke-dashoffset: 84.82; }
+      to   { stroke-dashoffset: 339.29; }
+    }
+
+    .timer-label {
+      position: absolute;
+      inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .timer-time {
+      font-family: var(--font-mono);
+      font-size: 1.5rem; font-weight: 500;
+      letter-spacing: -0.02em;
+      color: var(--label-primary);
+      line-height: 1;
+    }
+    .timer-sub {
+      font-family: var(--font-mono);
+      font-size: 0.65rem; font-weight: 400;
+      color: var(--label-tertiary);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    .timer-task-name {
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--label-secondary);
+      text-align: center;
+      max-width: 20ch;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* Task list inside preview */
+    .preview-tasks {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .preview-task {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      background: rgba(28,28,26,0.03);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .preview-task.active {
+      background: var(--accent-subtle);
+      border-color: rgba(196,91,58,0.15);
+    }
+
+    .task-check {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .preview-task.done .task-check {
+      background: var(--system-green); border-color: var(--system-green);
+    }
+    .preview-task.done .task-check svg { display: block; }
+    .preview-task .task-check svg { display: none; }
+
+    .task-title {
+      flex: 1; font-size: 0.875rem; font-weight: 400;
+      color: var(--label-primary);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .preview-task.done .task-title {
+      text-decoration: line-through;
+      color: var(--label-tertiary);
+    }
+
+    .task-pom-count {
+      font-family: var(--font-mono);
+      font-size: 0.7rem; color: var(--label-tertiary);
+      flex-shrink: 0;
+    }
+    .preview-task.active .task-pom-count { color: var(--accent); }
+
+    /* Decorative elements behind card */
+    .preview-bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--accent-subtle);
+      z-index: -1;
+    }
+    .preview-bg-circle-1 {
+      width: 260px; height: 260px;
+      right: -60px; top: -40px;
+    }
+    .preview-bg-circle-2 {
+      width: 160px; height: 160px;
+      left: -40px; bottom: -20px;
+    }
+
+    /* ─── Stats bar ───────────────────────────────────────────── */
+    .stats-bar {
+      border-top: 1px solid var(--divider);
+      padding: 12px 0 0;
+      display: flex; gap: 20px; align-items: center;
+    }
+    .stat-item {
+      display: flex; flex-direction: column; gap: 1px;
+    }
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 1rem; font-weight: 500;
+      color: var(--label-primary); line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.7rem; color: var(--label-tertiary);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .stat-divider {
+      width: 1px; height: 28px; background: var(--divider);
+    }
+
+    /* ─── Features ────────────────────────────────────────────── */
+    .features {
+      padding: 80px 24px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    @media (min-width: 768px) { .features { padding: 96px 48px; } }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.75rem; font-weight: 500;
+      color: var(--label-tertiary);
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin-bottom: 32px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1px;
+      background: var(--divider);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    @media (min-width: 640px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 1024px) { .features-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .feature {
+      background: var(--bg-surface);
+      padding: 28px 24px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: background 0.15s;
+    }
+    .feature:hover { background: rgba(247,246,243,0.5); }
+
+    .feature-icon {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--radius-md);
+      background: var(--accent-subtle);
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .feature h3 {
+      font-size: 0.9375rem; font-weight: 500;
+      color: var(--label-primary); line-height: 1.3;
+    }
+
+    .feature p {
+      font-size: 0.875rem; font-weight: 300;
+      color: var(--label-secondary); line-height: 1.55;
+    }
+
+    /* ─── How it works ────────────────────────────────────────── */
+    .how {
+      padding: 80px 24px;
+      background: var(--label-primary);
+      color: #F0EDE8;
+    }
+    @media (min-width: 768px) { .how { padding: 96px 48px; } }
+
+    .how-inner {
+      max-width: 1200px; margin: 0 auto;
+    }
+
+    .how .section-label { color: rgba(240,237,232,0.45); }
+
+    .how-steps {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      margin-top: 0;
+    }
+    @media (min-width: 768px) { .how-steps { grid-template-columns: repeat(3, 1fr); gap: 48px; } }
+
+    .how-step {
+      display: flex; flex-direction: column; gap: 14px;
+    }
+
+    .step-number {
+      font-family: var(--font-mono);
+      font-size: 0.7rem; font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .how-step h3 {
+      font-size: 1.125rem; font-weight: 400;
+      color: #F0EDE8; line-height: 1.3;
+      letter-spacing: -0.02em;
+    }
+
+    .how-step p {
+      font-size: 0.875rem; font-weight: 300;
+      color: rgba(240,237,232,0.65); line-height: 1.6;
+    }
+
+    .step-rule {
+      width: 24px; height: 1px;
+      background: var(--accent);
+    }
+
+    /* ─── CTA section ─────────────────────────────────────────── */
+    .cta-section {
+      padding: 80px 24px;
+      max-width: 1200px; margin: 0 auto;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; gap: 28px;
+    }
+    @media (min-width: 768px) { .cta-section { padding: 96px 48px; } }
+
+    .cta-headline {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 300; letter-spacing: -0.03em; line-height: 1.15;
+      max-width: 20ch;
+    }
+    .cta-headline strong { font-weight: 600; color: var(--accent); }
+
+    .cta-sub {
+      font-size: 1rem; font-weight: 300;
+      color: var(--label-secondary);
+      max-width: 38ch; line-height: 1.6;
+    }
+
+    /* ─── Footer ──────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--divider);
+      padding: 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      max-width: 1200px; margin: 0 auto;
+      width: 100%;
+    }
+
+    footer p {
+      font-size: 0.8rem; color: var(--label-tertiary);
+    }
+
+    footer a {
+      font-size: 0.8rem; color: var(--label-tertiary);
+      text-decoration: none; transition: color 0.15s;
+    }
+    footer a:hover { color: var(--label-primary); }
+    footer a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+
+    /* ─── Scrolled-in reveal ──────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.55s var(--ease-out), transform 0.55s var(--ease-out);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── Responsive text ─────────────────────────────────────── */
+    @media (max-width: 899px) {
+      .hero { min-height: auto; padding-top: 40px; }
+      .hero-preview { order: -1; }
+    }
+
+    /* ─── Selection & caret ───────────────────────────────────── */
+    ::selection { background: var(--accent-muted); color: var(--label-primary); }
+    :focus-visible { outline-color: var(--accent); }
+
+    /* ─── Scrollbar ───────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(28,28,26,0.15); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(28,28,26,0.25); }
+
+    /* ─── Reduced motion ──────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
       }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Saltar al contenido principal</a>
 
-      .hero p {
-        font-size: 1.25rem;
-        margin-bottom: 2rem;
-        opacity: 0.9;
-      }
+  <!-- Nav -->
+  <nav class="nav" aria-label="Navegación principal">
+    <a href="/" class="nav-brand" aria-label="todo-pom, inicio">todo-pom<span aria-hidden="true">.</span></a>
+    <a href="/app/" class="nav-cta">
+      Abrir la app
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </nav>
 
-      .features {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2rem;
-        padding: 4rem 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
+  <main id="main">
 
-      .feature-card {
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 1rem;
-        padding: 2rem;
-        border: 1px solid rgba(255,255,255,0.2);
-      }
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero-copy">
+        <span class="hero-label">
+          <span class="hero-label-dot" aria-hidden="true"></span>
+          Timer activo
+        </span>
 
-      .feature-card h3 {
-        margin-bottom: 0.75rem;
-        font-size: 1.25rem;
-      }
+        <h1 id="hero-heading" class="hero-headline">
+          Trabaja en<br>
+          <strong>intervalos.</strong><br>
+          Termina lo que<br>importa.
+        </h1>
 
-      .cta {
-        text-align: center;
-        padding: 4rem 2rem;
-      }
+        <p class="hero-sub">
+          Un timer Pomodoro por cada tarea. Cuando el foco termina, la tarea sabe cuántos intervalos te costó. Sin distracciones, sin perder el hilo.
+        </p>
 
-      .btn {
-        display: inline-block;
-        background: #fff;
-        color: #667eea;
-        padding: 1rem 2.5rem;
-        border-radius: 999px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
+        <div class="hero-actions">
+          <a href="/app/" class="btn-primary">
+            Empezar a trabajar
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
 
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      }
-
-      .footer {
-        text-align: center;
-        padding: 2rem;
-        opacity: 0.7;
-        font-size: 0.875rem;
-      }
-
-      @media (max-width: 768px) {
-        .hero h1 { font-size: 2rem; }
-        .features { grid-template-columns: 1fr; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="hero">
-      <h1>todo-pom</h1>
-      <p>Gestiona tus tareas y mejora tu productividad con la técnica Pomodoro</p>
-      <a href="/app/" class="btn">Empezar ahora</a>
-    </div>
-
-    <div class="features">
-      <div class="feature-card">
-        <h3>📝 Gestión de Tareas</h3>
-        <p>Organiza tus pendientes con listas, etiquetas, categorías y prioridades.</p>
+        <p class="hero-note">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Gratis, sin cuenta, todo en tu navegador
+        </p>
       </div>
-      <div class="feature-card">
-        <h3>🍅 Timer Pomodoro</h3>
-        <p>Focus de 25 minutos y descansos programados para mantener la concentración.</p>
-      </div>
-      <div class="feature-card">
-        <h3>📊 Modo Kanban</h3>
-        <p>Visualiza tu trabajo en un tablero interactivo arrastrando y soltando.</p>
-      </div>
-      <div class="feature-card">
-        <h3>💾 Persistencia Automática</h3>
-        <p>Tus datos se guardan automáticamente en tu navegador.</p>
-      </div>
-    </div>
 
-    <div class="cta">
-      <a href="/app/" class="btn">Usar la App Ahora</a>
-    </div>
+      <!-- App Preview (decorativa, aria-hidden) -->
+      <div class="hero-preview" aria-hidden="true">
+        <span class="preview-bg-circle preview-bg-circle-1"></span>
+        <span class="preview-bg-circle preview-bg-circle-2"></span>
 
-    <div class="footer">
-      <p>todo-pom &copy; 2026</p>
-    </div>
-  </body>
+        <div class="preview-card">
+          <div class="preview-header">
+            <span class="preview-brand">todo-pom<span>.</span></span>
+            <span class="preview-phase-badge">Trabajo</span>
+          </div>
+
+          <!-- Timer ring -->
+          <div class="timer-container">
+            <div class="timer-ring">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="timer-ring-track" cx="60" cy="60" r="54"/>
+                <circle class="timer-ring-progress" cx="60" cy="60" r="54"/>
+              </svg>
+              <div class="timer-label">
+                <span class="timer-time">18:43</span>
+                <span class="timer-sub">restantes</span>
+              </div>
+            </div>
+            <span class="timer-task-name">Revisar diseño de landing</span>
+          </div>
+
+          <!-- Task list -->
+          <div class="preview-tasks" role="list">
+            <div class="preview-task done" role="listitem">
+              <span class="task-check">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="1.5 5 4 7.5 8.5 2.5"/>
+                </svg>
+              </span>
+              <span class="task-title">Definir estructura de componentes</span>
+              <span class="task-pom-count">3🍅</span>
+            </div>
+            <div class="preview-task active" role="listitem">
+              <span class="task-check"></span>
+              <span class="task-title">Revisar diseño de landing</span>
+              <span class="task-pom-count">1🍅</span>
+            </div>
+            <div class="preview-task" role="listitem">
+              <span class="task-check"></span>
+              <span class="task-title">Escribir tests de integración</span>
+              <span class="task-pom-count">—</span>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-bar">
+            <div class="stat-item">
+              <span class="stat-value">4</span>
+              <span class="stat-label">hoy</span>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="stat-item">
+              <span class="stat-value">12</span>
+              <span class="stat-label">esta semana</span>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="stat-item">
+              <span class="stat-value">1/3</span>
+              <span class="stat-label">completadas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" aria-labelledby="features-heading">
+      <p class="section-label" id="features-heading">Qué incluye</p>
+      <div class="features-grid">
+        <article class="feature reveal">
+          <div class="feature-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h3>Timer por tarea</h3>
+          <p>Cada tarea tiene su propio Pomodoro. El contador corre sobre la tarea activa y queda registrado al completarla.</p>
+        </article>
+        <article class="feature reveal">
+          <div class="feature-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </div>
+          <h3>Vista Kanban</h3>
+          <p>Mueve tareas entre columnas arrastrando. Ve qué está pendiente, en progreso, y hecho sin cambiar de herramienta.</p>
+        </article>
+        <article class="feature reveal">
+          <div class="feature-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h3>Filtros y etiquetas</h3>
+          <p>Filtra por categoría, prioridad, fecha de vencimiento o etiqueta. Tu lista, vista desde el ángulo que necesitas.</p>
+        </article>
+        <article class="feature reveal">
+          <div class="feature-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h3>Persistencia local</h3>
+          <p>Tus tareas viven en tu navegador. Sin cuenta, sin servidor, sin perder nada si cierras la pestaña.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how" aria-labelledby="how-heading">
+      <div class="how-inner">
+        <p class="section-label" id="how-heading">Cómo funciona</p>
+        <div class="how-steps">
+          <div class="how-step reveal">
+            <span class="step-number">01</span>
+            <div class="step-rule" aria-hidden="true"></div>
+            <h3>Agrega tus tareas</h3>
+            <p>Escribe lo que necesitas hacer. Añade descripción, prioridad, categoría y fecha si quieres. O solo el título.</p>
+          </div>
+          <div class="how-step reveal">
+            <span class="step-number">02</span>
+            <div class="step-rule" aria-hidden="true"></div>
+            <h3>Activa el timer en la tarea</h3>
+            <p>Presiona el botón de Pomodoro en cualquier tarea. 25 minutos de foco arrancan. El resto de tus pestañas pueden esperar.</p>
+          </div>
+          <div class="how-step reveal">
+            <span class="step-number">03</span>
+            <div class="step-rule" aria-hidden="true"></div>
+            <h3>Descansa y sigue</h3>
+            <p>Al terminar el intervalo, la app te avisa. Toma 5 minutos. Después arranca el siguiente. Así hasta tachar la tarea.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA final -->
+    <section class="cta-section" aria-labelledby="cta-heading">
+      <h2 id="cta-heading" class="cta-headline">
+        Tu siguiente tarea<br>
+        te está <strong>esperando.</strong>
+      </h2>
+      <p class="cta-sub">
+        Abre la app, escribe lo que tienes que hacer hoy, y arranca el primer Pomodoro.
+      </p>
+      <a href="/app/" class="btn-primary">
+        Abrir todo-pom
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>todo-pom &copy; 2026</p>
+    <nav aria-label="Footer">
+      <a href="/app/">Abrir la app</a>
+    </nav>
+  </footer>
+
+  <script>
+    // Intersection Observer — reveal on scroll
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+    // Timer display — live clock from a synthetic "18:43" base
+    (function () {
+      let total = 18 * 60 + 43;
+      const el = document.querySelector('.timer-time');
+      if (!el) return;
+      setInterval(() => {
+        total = total > 0 ? total - 1 : 25 * 60;
+        const m = Math.floor(total / 60).toString().padStart(2, '0');
+        const s = (total % 60).toString().padStart(2, '0');
+        el.textContent = m + ':' + s;
+      }, 1000);
+    })();
+  </script>
+</body>
 </html>
